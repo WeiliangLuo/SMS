@@ -34,7 +34,7 @@ public class MessageManager {
 	 * //TODO who will use this?
 	 **/
 	public List<Message> listMessages(){
-		
+		return null;
 	}
 	
 	/**
@@ -42,7 +42,7 @@ public class MessageManager {
 	 * //TODO who will use this?
 	 * */
 	public Message getMessageById(int id){
-		
+		return null;
 	}
 	
 	/**
@@ -52,7 +52,7 @@ public class MessageManager {
 	 * @return List of messages belong to conversation
 	 **/
 	public List<Message> getMessagesInCoversation(int conId){
-		
+		return null;
 	}
 	
 	/**
@@ -60,7 +60,7 @@ public class MessageManager {
 	 * 
 	 * */
 	public List<Conversation> listConversations(){
-		
+		return null;
 	}
 	
 	/**
@@ -68,6 +68,6 @@ public class MessageManager {
 	 * 
 	 * */
 	public Conversation getConversation(int id){
-		
+		return null;
 	}
 }

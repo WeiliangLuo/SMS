@@ -1,22 +1,24 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:SMS="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_create_message"
+        android:title="@string/action_create_message"
         android:icon="@drawable/ic_action_new_message"
         android:orderInCategory="100"
-        android:showAsAction="ifRoom"
-        android:title="@string/action_create_message"/>
+        SMS:showAsAction="ifRoom"
+        />
     
     <item
         android:id="@+id/action_search"
+        android:title="@string/action_search"
         android:icon="@drawable/ic_action_search"
-        android:orderInCategory="100"
-        android:showAsAction="ifRoom"
-        android:actionViewClass="android.support.v7.widget.SearchView"
-        android:title="@string/action_search"/>
+        android:orderInCategory="100"       
+        SMS:showAsAction="ifRoom|collapseActionView"
+        SMS:actionViewClass="android.support.v7.widget.SearchView"/>
 
     <item
         android:id="@+id/action_delete_all"
+        android:title="@string/action_delete_all"
         android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/action_delete_all"/>
+        android:showAsAction="never"/>
 </menu>

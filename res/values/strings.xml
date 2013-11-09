@@ -6,5 +6,14 @@
     <string name="action_create_message">NEW MESSAGE</string>
     <string name="action_delete_all">Delete all threads</string>
     <string name="action_search">SEARCH</string>
+    <string name="title_activity_search">SearchActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="search_hint">Search message</string>
+    <string name="title_activity_new_message">Compose message</string>
+    <string name="to">To</string>
+    <string name="type_message">Type your message</string>
+    <string name="title_activity_message_list">MessageListActivity</string>
+    <string name="action_call">call</string>
+    <string name="action_add_contact">Add contact</string>
 
 </resources>

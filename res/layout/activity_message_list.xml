@@ -1,0 +1,39 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/my_vertical_margin"
+    android:paddingLeft="@dimen/my_horizontal_margin"
+    android:paddingRight="@dimen/my_horizontal_margin"
+    android:paddingTop="@dimen/my_vertical_margin"
+    tools:context=".MessageListActivity" >
+
+    <ListView
+        android:id="@+id/list_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btn_send"
+        android:layout_alignLeft="@+id/text_content">
+    </ListView>
+        
+    <EditText
+        android:id="@+id/text_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp"
+        android:layout_toLeftOf="@+id/btn_send"
+        android:ems="10"
+        android:maxLines="4"
+        android:hint="@string/type_message">
+    </EditText>
+
+    <ImageButton
+        android:id="@+id/btn_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@+id/text_content"
+        android:src="@drawable/ic_action_send" />
+
+</RelativeLayout>

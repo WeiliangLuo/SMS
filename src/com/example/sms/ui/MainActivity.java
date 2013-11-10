@@ -1,36 +1,109 @@
 package com.example.sms.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
+import android.view.ActionMode.Callback;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import com.example.sms.R;
 
 public class MainActivity extends ActionBarActivity implements OnItemClickListener {	
+	private static final String TAG = "MainActivity";
 	private ListView listView;
 	private List<Map<String, Object>> list;
-
+	private SimpleAdapter adapter;
+	
 	private MenuItem searchItem;
 	private SearchView searchView;
+	
+	private MultiChoiceModeListener multiChoiceModeListener = new MultiChoiceModeListener() {
+	    
+		@Override
+	    public void onItemCheckedStateChanged(ActionMode mode, int position,
+	                                          long id, boolean checked) {
+	        // Here you can do something when items are selected/de-selected,
+	        // such as update the title in the CAB
+	    	mode.setTitle(listView.getCheckedItemCount()+" conversation selected");
+	    }
+
+	    @Override
+	    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+	        // Respond to clicks on the actions in the CAB
+	        switch (item.getItemId()) {
+            case R.id.action_delete:
+            	// Get checkedPositions before show alertDialog
+            	// becuase alertDialog will deselect items selected in listView
+    			List<Integer> checkedPositions = new ArrayList<Integer>();    			
+    			SparseBooleanArray checkedItems = listView.getCheckedItemPositions();
+    			if(checkedItems!=null){
+    				int count = adapter.getCount();
+    				for(int pos=0; pos<count; pos++){
+    					if(checkedItems.get(pos)){
+    						checkedPositions.add(pos);
+    					}
+    				}
+    			}
+            	delete_conversations(checkedPositions);
+            	
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+	        }
+	    }
+
+	    @Override
+	    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+	        // Inflate the menu for the CAB
+	        MenuInflater inflater = mode.getMenuInflater();
+	        inflater.inflate(R.menu.conversation_context_menu, menu);
+	        mode.setTitle(listView.getCheckedItemCount()+" conversation selected");
+	        return true;
+	    }
+
+	    @Override
+	    public void onDestroyActionMode(ActionMode mode) {
+	        // Here you can make any necessary updates to the activity when
+	        // the CAB is removed. By default, selected items are deselected/unchecked.
+	    }
+
+	    @Override
+	    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+	        // Here you can perform updates to the CAB due to
+	        // an invalidate() request
+	        return false;
+	    }
+	};
 
 	
 	@Override
@@ -39,9 +112,12 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 		setContentView(R.layout.activity_main);
 		
 	    listView = (ListView) findViewById(R.id.listview);
+	    listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+	    listView.setMultiChoiceModeListener(multiChoiceModeListener);
 	    
+	    // associate data with listView
 		list = getData();
-		SimpleAdapter adapter = new SimpleAdapter(this, 
+		adapter = new SimpleAdapter(this, 
 				list,
 				R.layout.conversation_list,
 				new String[]{"name", "count", "summary", "date"},
@@ -75,7 +151,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	            return false;
 	        }
 	    };
-		
+	    
 		searchView.setOnQueryTextListener(queryTextListener);
         searchView.setQueryHint(getString(R.string.search_hint));
         searchView.setIconifiedByDefault(true);
@@ -127,15 +203,18 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
                 startActivity(intent);
 	            return true;
 	        case R.id.action_delete_all:
-	            // delete all
+	        	delete_conversations(null);
 	            return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
 	}
 	
-	
-	List<Map<String, Object>> getData(){
+	/**
+	 *	Prepare data for listView 
+	 * 
+	 **/
+	private List<Map<String, Object>> getData(){
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		Map<String, Object> map = null;
 		
@@ -149,5 +228,52 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
     		list.add(map);        	
 		}
         return list;
+	}
+	
+	/**
+	 *	Delete conversations  
+	 * 
+	 *  @param positions : positions of item to be deleted
+	 *  				   delete all conversations when null
+	 **/
+	private void delete_conversations(List<Integer> positions){
+		final List<Integer> checkedPositions = positions;
+		
+		// prompt alert dialog, ask user's confirmation
+    	AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+    	alert.setTitle("Alert");
+    	alert.setMessage("Conversations will be permanently deleted! Are you sure to continue?");
+    	alert.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+    		public void onClick(DialogInterface dialog, int whichButton) {
+    			// TODO update database in another thread.  
+    			
+    			// delete selected items
+    			if(checkedPositions!=null){
+	    			// sort the positions in descending order
+	    			// so that it is safe to delete data item by locations
+	    			Collections.sort(checkedPositions, new Comparator<Integer>(){
+	    				public int compare(Integer o1, Integer o2){
+	    					return o2.compareTo(o1);
+	    				}
+	    			});
+	    			for(Integer pos:checkedPositions){
+	    				Log.i(TAG, "Remove data from list"+pos.toString());
+	    				list.remove(pos.intValue());
+	    			}
+    			}
+    			// delete all items
+    			else{
+    				list.clear();
+    			}
+    			adapter.notifyDataSetChanged();
+    			Log.i(TAG, "conversations deleted");
+    		}
+    	});
+    	alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+    		public void onClick(DialogInterface dialog, int whichButton) {
+        		  Log.i(TAG, "conversations not deleted");
+    		}
+    	});
+    	alert.show();
 	}
 }

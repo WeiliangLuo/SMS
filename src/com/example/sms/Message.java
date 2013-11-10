@@ -124,4 +124,8 @@ public class Message {
 	public boolean equals(Message msg){
 		return msg.id == id;
 	}
+	
+	public boolean fromMe(){
+		return sender==null;
+	}
 }

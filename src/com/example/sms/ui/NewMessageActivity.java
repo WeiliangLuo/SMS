@@ -19,7 +19,7 @@ import android.widget.Toast;
 import com.example.sms.R;
 
 public class NewMessageActivity extends Activity implements OnClickListener {
-	private final static String Tag = "NewMessageActivity";
+	private final static String TAG = "NewMessageActivity";
 	private ImageButton btn_send;
 	private ImageButton btn_add;
 	private EditText et_to;
@@ -38,6 +38,8 @@ public class NewMessageActivity extends Activity implements OnClickListener {
 		btn_send.setOnClickListener(this);
 		btn_add.setOnClickListener(this);
 		
+		Intent intent = getIntent();
+		et_content.setText(intent.getStringExtra("content"));
 		// Show the up button
 		ActionBar actionBar = this.getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
@@ -65,13 +67,13 @@ public class NewMessageActivity extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		if(v.equals(btn_add)){
-			Log.i(Tag, "Add recipients");
+			Log.i(TAG, "Add recipients");
 			Intent intent = new Intent(Intent.ACTION_PICK);
 			intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
 			startActivityForResult(intent, 1);
 		}
 		else if(v.equals(btn_send)){
-			Log.i(Tag, "Send message");
+			Log.i(TAG, "Send message");
 		}
 	}
 

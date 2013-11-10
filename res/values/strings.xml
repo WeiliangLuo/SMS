@@ -15,5 +15,10 @@
     <string name="title_activity_message_list">MessageListActivity</string>
     <string name="action_call">call</string>
     <string name="action_add_contact">Add contact</string>
+    <string name="action_delete">Delete</string>
+    <string name="empty_list">No content</string>
+    <string name="send">Send</string>
+    <string name="action_forward">Forward</string>
+    <string name="action_detail">Message details</string>
 
 </resources>

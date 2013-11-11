@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,7 +23,7 @@ import com.example.sms.R;
 public class NewMessageActivity extends Activity implements OnClickListener {
 	private final static String TAG = "NewMessageActivity";
 	private ImageButton btn_send;
-	private ImageButton btn_add;
+	private ImageButton btn_add_rec;
 	private EditText et_to;
 	private EditText et_content;
 	
@@ -31,15 +33,19 @@ public class NewMessageActivity extends Activity implements OnClickListener {
 		setContentView(R.layout.activity_new_message);
 		
 		btn_send = (ImageButton) findViewById(R.id.btn_send);
-		btn_add = (ImageButton) findViewById(R.id.btn_add);
+		btn_add_rec = (ImageButton) findViewById(R.id.btn_add);
 		et_to = (EditText) findViewById(R.id.text_to);
 		et_content = (EditText) findViewById(R.id.text_content);
 		
 		btn_send.setOnClickListener(this);
-		btn_add.setOnClickListener(this);
+		btn_add_rec.setOnClickListener(this);
+		et_content.addTextChangedListener(contentWatcher);
 		
 		Intent intent = getIntent();
 		et_content.setText(intent.getStringExtra("content"));
+		if(et_content.length()==0){
+			btn_send.setEnabled(false);
+		}
 		// Show the up button
 		ActionBar actionBar = this.getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
@@ -66,7 +72,7 @@ public class NewMessageActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		if(v.equals(btn_add)){
+		if(v.equals(btn_add_rec)){
 			Log.i(TAG, "Add recipients");
 			Intent intent = new Intent(Intent.ACTION_PICK);
 			intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
@@ -108,4 +114,27 @@ public class NewMessageActivity extends Activity implements OnClickListener {
 	public void showSelectedNumber(String type, String number) {
 	    Toast.makeText(this, type + ": " + number, Toast.LENGTH_LONG).show();      
 	}
+
+	private TextWatcher contentWatcher = new TextWatcher(){
+		@Override
+		public void afterTextChanged(Editable etd) {
+			if(etd.length()==0){
+				btn_send.setEnabled(false);
+			}
+			else{
+				btn_send.setEnabled(true);
+			}
+		}
+	
+		@Override
+		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
+		}
+	
+		@Override
+		public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+			// TODO Auto-generated method stub
+			
+		}
+	};
 }

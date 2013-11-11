@@ -11,13 +11,18 @@ import java.util.Map;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.app.AlertDialog.Builder;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract.Intents;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -110,7 +115,6 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
 	    listView = (ListView) findViewById(R.id.listview);
 	    listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 	    listView.setMultiChoiceModeListener(multiChoiceModeListener);
@@ -119,7 +123,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 		list = getData();
 		adapter = new SimpleAdapter(this, 
 				list,
-				R.layout.conversation_list,
+				R.layout.conversation_row,
 				new String[]{"name", "count", "summary", "date"},
 				new int[]{R.id.name, R.id.count, R.id.summary, R.id.date});
 		listView.setAdapter(adapter);
@@ -138,7 +142,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 		SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
 	        @Override
 	        public boolean onQueryTextSubmit(String query) {
-	            Intent intent = new Intent();
+	            Intent intent = new Intent(Intent.ACTION_SEARCH);
 	            intent.setClass(MainActivity.this, SearchActivity.class);
 	            intent.putExtra(SearchManager.QUERY, query);
 	            startActivity(intent);

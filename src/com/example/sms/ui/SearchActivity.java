@@ -1,21 +1,48 @@
 package com.example.sms.ui;
 
+import java.util.List;
+
 import android.app.ActionBar;
 import android.app.ListActivity;
+import android.app.SearchManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 
+import com.example.sms.Message;
+import com.example.sms.MessageManager;
 import com.example.sms.R;
 
 public class SearchActivity extends ListActivity {
+	private List<Message> messages;
+	private MessageAdapter adapter;
+	private int count;
+	private String query;
 
+		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_search);
+	
+		Intent intent = getIntent();
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			query = intent.getStringExtra(SearchManager.QUERY);
+			// TODO doMySearch(query);
+			messages = MessageManager.searchMessages(query);
+			count = messages.size();
+			  
+			// display search result
+			adapter = new MessageAdapter(this, messages, MessageAdapter.TYPE_BASIC);
+			setListAdapter(adapter);
+		}
+		
+		// show up button 
 		ActionBar actionBar = this.getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setTitle(count + " matches for \"" + query+"\"");
 	}
 
 	@Override

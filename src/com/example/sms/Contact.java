@@ -1,12 +1,12 @@
 package com.example.sms;
 
 public class Contact {
-	private int id;
+	private long id;
 	private String name;
 	private String phoneNumber;
 	
 	/* Constructors */
-	public Contact(int id, String name, String phoneNumber) {
+	public Contact(long id, String name, String phoneNumber) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -20,7 +20,7 @@ public class Contact {
 
 	
 	/* Getter and Setter */
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
@@ -32,6 +32,10 @@ public class Contact {
 		return name;
 	}
 
+	public String getNameOrNumber(){
+		return name!=null?name:phoneNumber;
+	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}

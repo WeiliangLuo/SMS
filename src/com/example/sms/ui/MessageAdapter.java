@@ -9,6 +9,7 @@ import com.example.sms.Message;
 import com.example.sms.R;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,13 +19,18 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 public class MessageAdapter extends BaseAdapter {
+	public static int TYPE_BASIC = 0;
+	public static int TYPE_BUBLE = 1;
+	
 	private List<Message> mMessages;
 	private Context mContext;
+	private int type;
 	
-	public MessageAdapter(Context context, List<Message> messages) {
+	public MessageAdapter(Context context, List<Message> messages, int type) {
         super();
         this.mContext = context;
         this.mMessages = messages;
+        this.type = type;
 	}
 	
 	@Override
@@ -45,43 +51,43 @@ public class MessageAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		Message msg = (Message) getItem(position);
-        ViewHolder holder; 
+        ViewHolder holder;
         if(convertView == null){
         	holder = new ViewHolder();
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.sms_row, parent, false);
-            holder.message = (TextView) convertView.findViewById(R.id.text_content);
-            convertView.setTag(holder);
+        	convertView = LayoutInflater.from(mContext).inflate(R.layout.message_bubble_row, parent, false);
+        	holder.name = (TextView) convertView.findViewById(R.id.text_name);
+        	holder.message = (TextView) convertView.findViewById(R.id.text_content);
+        	convertView.setTag(holder);	
         }
         else{
             holder = (ViewHolder) convertView.getTag();
         }
         
         holder.message.setText(msg.getContent());
-        //Date date = new Date(msg.getTimeStamp());
-        //SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d");
-        //holder.date.setText(dateFormat.format(date));
         LayoutParams lp = (LayoutParams) holder.message.getLayoutParams();
-        /*//check if it is a status message then remove background, and change text color.
-        if(msg.isStatusMessage())
-        {
-                holder.message.setBackgroundDrawable(null);
-                lp.gravity = Gravity.LEFT;
-                holder.message.setTextColor(R.color.textFieldColor);
+        //check display type then remove background, and change text color.
+        if(type == TYPE_BASIC){
+        	holder.name.setVisibility(View.VISIBLE);
+        	holder.name.setText(msg.getContact().getNameOrNumber());
+            holder.name.setTextColor(mContext.getResources().getColor(R.color.black));
+        	
+            holder.message.setBackgroundDrawable(null);
+            holder.message.setTextColor(mContext.getResources().getColor(R.color.black));
         }
-        else
-        {                
-      
-        }*/
-        //Check whether message is mine to show green background and align to right
-        if(msg.fromMe()){
-        	holder.message.setBackgroundResource(R.drawable.speech_bubble_green);
-            lp.gravity = Gravity.RIGHT;
-        }
-        //If not mine then it is from sender to show orange background and align to left
         else{
-            holder.message.setBackgroundResource(R.drawable.speech_bubble_orange);
-            lp.gravity = Gravity.LEFT;
+        	holder.name.setVisibility(View.GONE);
+            //Check whether message is mine to show green background and align to right
+            if(msg.fromMe()){
+            	holder.message.setBackgroundResource(R.drawable.speech_bubble_green);
+                lp.gravity = Gravity.RIGHT;
+            }
+            //If not mine then it is from sender to show orange background and align to left
+            else{
+                holder.message.setBackgroundResource(R.drawable.speech_bubble_orange);
+                lp.gravity = Gravity.LEFT;
+            }
         }
+
         holder.message.setLayoutParams(lp);
         return convertView;
 	}
@@ -103,6 +109,7 @@ public class MessageAdapter extends BaseAdapter {
 	}
 	
 	private static class ViewHolder{
+		TextView name;
 		TextView message;
 	}	
 }

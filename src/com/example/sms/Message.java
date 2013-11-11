@@ -11,7 +11,8 @@ public class Message {
 	public static final boolean SMS_UNREAD 	= true;
 	public static final boolean SMS_READ 	= false;
 
-	private int id;
+	private long id;
+	private long conversation_id;
 	private String content;
 	// Epoch time
 	private long timeStamp;
@@ -29,10 +30,11 @@ public class Message {
 	private Contact receiver;
 	
 	/* Constructors */
-	public Message(int id, String content, int type, boolean unread, long timeStamp, Contact sender,
+	public Message(long id, long cid, String content, int type, boolean unread, long timeStamp, Contact sender,
 			Contact receiver) {
 		super();
 		this.id = id;
+		this.conversation_id = cid;
 		this.content = content;
 		this.type = type;
 		this.unread = unread;
@@ -42,18 +44,26 @@ public class Message {
 	}
 
 	public Message(Message msg){
-		this(msg.id, msg.content, msg.type, msg.unread, msg.timeStamp, msg.sender, msg.receiver);
+		this(msg.id, msg.conversation_id, msg.content, msg.type, msg.unread, msg.timeStamp, msg.sender, msg.receiver);
 	}
 	/* End Constructor */
 	
 	
 	/* Getter and Setter */
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
 	public void setId(int id) {
 		this.id = id;
+	}
+	
+	public long getConversationId() {
+		return conversation_id;
+	}
+
+	public void setConversationId(int cid) {
+		this.conversation_id = cid;
 	}
 
 	public String getContent() {
@@ -125,7 +135,19 @@ public class Message {
 		return msg.id == id;
 	}
 	
+	/**
+	 *  Return true if this message is sent from user
+	 *  
+	 **/
 	public boolean fromMe(){
 		return sender==null;
+	}
+	
+	/**
+	 *  Return the contact that is not the user
+	 * 
+	 * */
+	public Contact getContact(){
+		return (receiver==null)?sender:receiver;
 	}
 }

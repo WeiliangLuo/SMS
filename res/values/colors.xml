@@ -4,4 +4,5 @@
 	<color name="textFieldColor">#000</color>
 	<color name="textShadow">#FFF</color>
 	<color name="listViewBg">#DADFEE</color>
+	<color name="black">#000000</color>	
 </resources>

@@ -2,6 +2,8 @@ package com.example.sms.ui;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -10,12 +12,14 @@ import java.util.Map;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.app.SearchManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -25,14 +29,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.example.sms.Contact;
 import com.example.sms.Message;
+import com.example.sms.MessageManager;
 import com.example.sms.R;
 
 public class MessageListActivity extends ListActivity implements OnItemClickListener, OnClickListener{
@@ -48,14 +51,19 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 		setContentView(R.layout.activity_message_list);
 		btn_send = (ImageButton) findViewById(R.id.btn_send);
 		et_content = (EditText) findViewById(R.id.text_content);
-		btn_send.setOnClickListener(this);
 		
+		btn_send.setOnClickListener(this);
+		et_content.addTextChangedListener(contentWatcher);
+
 		// initialize conversation data
 		Intent intent = getIntent();
 		int cid = intent.getIntExtra("cid", 0);
 		rec = new Contact(1, null, "2106302912");
-		messages = new ArrayList<Message>();
+		messages = MessageManager.getMessagesInCoversation(0);
 		
+		if(et_content.length()==0){
+			btn_send.setEnabled(false);
+		}
 		// Show the up button
 		ActionBar actionBar = this.getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
@@ -70,30 +78,7 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 		}
 			    
 	    // associate data with listView
-		for(int i=0; i<6; i++){
-			if(i%2==0){
-				Message msg = new Message(i, 
-						"Message from me, this is a very nice day. We are going to picnic tommorrow." +
-						"I am so happy. How are u doing?", 
-						Message.SMS_TYPE_SENT, 
-						Message.SMS_READ, 
-						12345678, 
-						null,
-						rec);
-				messages.add(msg);
-			}
-			else{
-				Message msg = new Message(i, 
-						"Replied message from Bob", 
-						Message.SMS_TYPE_RECEIVED, 
-						Message.SMS_READ, 
-						123456789, 
-						rec,
-						null);
-				messages.add(msg);
-			}
-		}
-		adapter = new MessageAdapter(this, messages);
+		adapter = new MessageAdapter(this, messages, MessageAdapter.TYPE_BUBLE);
 		setListAdapter(adapter);
 		getListView().setOnItemClickListener(this);
 		getListView().requestFocus();
@@ -172,14 +157,29 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
     public boolean onContextItemSelected(MenuItem item) {
     	AdapterView.AdapterContextMenuInfo info = 
     			(AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-    	int pos = info.position;
+    	final int pos = info.position;
     	
         switch (item.getItemId()) {
             case R.id.action_forward:
                 forward_message(pos);
                 return true;
             case R.id.action_delete:
-                delete_message(pos);
+            	// prompt alert dialog, ask user's confirmation
+            	AlertDialog.Builder alert = new AlertDialog.Builder(MessageListActivity.this);
+            	alert.setTitle("Alert");
+            	alert.setMessage("Message will be permanently deleted! Are you sure to continue?");
+            	// Delete //
+            	alert.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            		public void onClick(DialogInterface dialog, int whichButton) {
+                        delete_message(pos);
+            		}
+            	});
+            	// Cancel //
+            	alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            		public void onClick(DialogInterface dialog, int whichButton) {
+            		}
+            	});
+            	alert.show();
                 return true;
             case R.id.action_detail:
             	show_message_detail(pos);
@@ -199,9 +199,12 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
     }
     
     private void delete_message(int position){
-    	//Message msg = (Message) getListView().getItemAtPosition(position);
+    	Message msg = (Message) getListView().getItemAtPosition(position);
     	adapter.remove(position);
     	adapter.notifyDataSetChanged();
+    	if(adapter.getCount()==0){
+    		finish();
+    	}
     }
     
     private void show_message_detail(int position){
@@ -231,4 +234,27 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 			//TODO send message out
 		}
 	}
+	
+	private TextWatcher contentWatcher = new TextWatcher(){
+		@Override
+		public void afterTextChanged(Editable etd) {
+			if(etd.length()==0){
+				btn_send.setEnabled(false);
+			}
+			else{
+				btn_send.setEnabled(true);
+			}
+		}
+	
+		@Override
+		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
+		}
+	
+		@Override
+		public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+			// TODO Auto-generated method stub
+			
+		}
+	};
 }

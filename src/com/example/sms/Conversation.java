@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Conversation {
-	private int id;
+	private long id;
 	private String summary;
 	private Contact contact;
 	private List<Message> messages;
 	private int msgCount;
 	
 	/* Constructors */
-	public Conversation(int id, String summary, Contact contact) {
+	public Conversation(long id, String summary, Contact contact) {
 		super();
 		this.id = id;
 		this.summary = summary;
@@ -31,7 +31,7 @@ public class Conversation {
 	
 	
 	/* Getter and Setter */
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 

@@ -51,10 +51,12 @@ public class ConversationAdapter extends BaseAdapter {
         	convertView = LayoutInflater.from(mContext).inflate(R.layout.conversation_row, parent, false);
         	holder.name = (TextView) convertView.findViewById(R.id.name);
         	holder.count = (TextView) convertView.findViewById(R.id.count);
+        	holder.draft = (TextView) convertView.findViewById(R.id.draft);
         	holder.summary = (TextView) convertView.findViewById(R.id.summary);
         	holder.date = (TextView) convertView.findViewById(R.id.date);
         	holder.relativeLayout = (RelativeLayout) convertView.findViewById(R.id.relativeLayout);
         	
+        	holder.draft.setTextColor(Color.RED);
         	holder.count.setTextColor(Color.GRAY);
         	holder.date.setTextColor(Color.GRAY);
         	convertView.setTag(holder);
@@ -65,7 +67,8 @@ public class ConversationAdapter extends BaseAdapter {
 		
         holder.name.setText(c.getContact().getNameOrNumber());
         holder.count.setText(String.valueOf(c.getMsgCount()));
-        holder.summary.setText(c.getSummary());        
+        holder.summary.setText(c.getSummary());
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d");
 		Date date = new Date(c.getTimeStamp());
         holder.date.setText(dateFormat.format(date));
@@ -79,6 +82,12 @@ public class ConversationAdapter extends BaseAdapter {
         	holder.name.setTypeface(null, Typeface.NORMAL);
         }
         
+        if(c.hasDraft()){
+        	holder.draft.setText("(Draft)");
+        }
+        else{
+        	holder.draft.setText("");
+        }
         return convertView;
 	}
 
@@ -109,6 +118,7 @@ public class ConversationAdapter extends BaseAdapter {
 	private static class ViewHolder{
 		TextView name;
 		TextView count;
+		TextView draft;
 		TextView summary;
 		TextView date;
 		RelativeLayout relativeLayout;

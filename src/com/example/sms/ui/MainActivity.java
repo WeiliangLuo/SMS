@@ -2,7 +2,6 @@ package com.example.sms.ui;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -10,27 +9,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
-import android.app.AlertDialog.Builder;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract.Intents;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
-import android.view.ActionMode.Callback;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -38,9 +28,7 @@ import android.view.View;
 import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 import com.example.sms.Conversation;
 import com.example.sms.MessageManager;
@@ -122,7 +110,12 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	    listView = (ListView) findViewById(R.id.listview);
 	    listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 	    listView.setMultiChoiceModeListener(multiChoiceModeListener);
-	    
+		listView.setOnItemClickListener(this);
+		listView.requestFocus();
+	}
+
+	@Override
+	public void onResume(){
 	    // associate data with listView
 	    conversationList = MessageManager.getConversations(this);
 	    // sort conversationList by timeStamp
@@ -135,10 +128,8 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 		});
 	    adapter = new ConversationAdapter(this, conversationList);
 		listView.setAdapter(adapter);
-		listView.setOnItemClickListener(this);
-		listView.requestFocus();
+		super.onResume();
 	}
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -197,8 +188,6 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
                 MessageListActivity.class);
         intent.putExtra("cid", c.getId());
         startActivity(intent);
-		
-		Log.e("Test", String.valueOf(c.getId()));
 	}
 
 	/**
@@ -258,9 +247,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
     	alert.setTitle("Alert");
     	alert.setMessage("Conversations will be permanently deleted! Are you sure to continue?");
     	alert.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-    		public void onClick(DialogInterface dialog, int whichButton) {
-    			// TODO update database in another thread.  
-    			
+    		public void onClick(DialogInterface dialog, int whichButton) {	
     			// delete selected items
     			if(checkedPositions!=null){
 	    			// sort the positions in descending order
@@ -271,7 +258,9 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	    				}
 	    			});
 	    			for(Integer pos:checkedPositions){
-	    				Log.i(TAG, "Remove data from list"+pos.toString());
+	    				Conversation c = (Conversation) adapter.getItem(pos);
+	    				c.delete(MainActivity.this);
+	    				// Update UI
 	    				adapter.remove(pos.intValue());
 	    			}
     			}

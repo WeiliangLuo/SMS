@@ -3,6 +3,9 @@ package com.example.sms;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Context;
+import android.net.Uri;
+
 public class Conversation {
 	private long id;
 	private String summary;
@@ -11,6 +14,7 @@ public class Conversation {
 	private int msgCount;
 	private long timeStamp;
 	private boolean hasUnread;
+	private boolean hasDraft;
 	
 	/* Constructors */
 	public Conversation(long id, String summary, Contact contact, long timeStamp) {
@@ -22,6 +26,7 @@ public class Conversation {
 		this.msgCount = 0;
 		this.timeStamp = timeStamp;
 		this.hasUnread = false;
+		this.hasDraft = false;
 	}
 	
 	public Conversation(Conversation con){
@@ -39,7 +44,7 @@ public class Conversation {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
@@ -77,6 +82,10 @@ public class Conversation {
 	
 	public void setHasUnread(boolean hasUnread){
 		this.hasUnread = hasUnread;
+	}
+	
+	public void setHasDraft(boolean hasDraft){
+		this.hasDraft = hasDraft;
 	}
 	/* End Getter and Setter */
 
@@ -119,5 +128,18 @@ public class Conversation {
 	
 	public boolean hasUnread(){
 		return this.hasUnread;
+	}
+	
+	public boolean hasDraft(){
+		return this.hasDraft;
+	}
+	
+	/**
+	 *  delete current message in the database
+	 * 
+	 * */
+	public void delete(Context context){
+		Uri uri = Uri.parse("content://sms/conversations/"+this.id);
+		context.getContentResolver().delete(uri, null, null);
 	}
 }

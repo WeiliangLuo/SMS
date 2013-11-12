@@ -32,7 +32,7 @@ public class MessageReceiver extends BroadcastReceiver {
                     // handle new message (save new message to database)
                     MessageManager.receiveMessage(context, address, body, timeStamp);
                     String name = ContactManager.getContactByNumber(context, address).getNameOrNumber();
-                    // notify user
+                    // notify user if this app is NOT running foreground
                     // TODO delete notification if this app is launched by the user.
             		NotificationCompat.Builder mBuilder =
             		        new NotificationCompat.Builder(context)

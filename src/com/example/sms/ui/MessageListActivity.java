@@ -7,6 +7,7 @@ import java.util.List;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
@@ -34,9 +36,16 @@ import com.example.sms.R;
 
 public class MessageListActivity extends ListActivity implements OnItemClickListener, OnClickListener{
 	private Contact rec;
+	private long cid;
+	private List<Message> messages;
+	// We need to keep track of draft, while user is editing it 
+	//   update draft to sent in db, when draft is sent.
+	//   update draft when this activity is destroyed.
+	private boolean localDraft;
+	private Message draft;
+
 	private ImageButton btn_send; 
 	private EditText et_content;
-	private List<Message> messages;
 	private MessageAdapter adapter;
 	
 	@Override
@@ -51,9 +60,27 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 
 		// initialize conversation data
 		Intent intent = getIntent();
-		int cid = intent.getIntExtra("cid", 0);
-		rec = new Contact(1, null, "2106302912");
-		messages = MessageManager.getMessagesInCoversation(0);
+		long cid = intent.getLongExtra("cid", 0);
+		messages = MessageManager.getMessagesInCoversation(this, cid);
+		draft = MessageManager.getDraftInCoversation(this, cid);
+		
+		// if there is no sent/received message
+		// the draft can not be null
+		if(messages.size()!=0){
+			rec = messages.get(0).getContact();
+		}
+		else{
+			rec = draft.getContact();
+		}
+		
+		if(draft!=null){
+			et_content.setText(draft.getContent());
+			localDraft = false;
+		}
+		else{
+			draft = new Message(-1, cid, "", Message.MESSAGE_TYPE_DRAFT, false, 0, null, rec);
+			localDraft = true;
+		}
 		
 		if(et_content.length()==0){
 			btn_send.setEnabled(false);
@@ -76,9 +103,30 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 		setListAdapter(adapter);
 		getListView().setOnItemClickListener(this);
 		getListView().requestFocus();
+		getListView().setSelectionFromTop(adapter.getCount(), 0);
 		registerForContextMenu(getListView());
 	}
 
+	@Override
+	public void onDestroy(){
+		if(!localDraft){
+			if(draft.getContent().length()==0){
+				draft.delete(this);
+			}
+			else{
+				draft.setTimeStamp(System.currentTimeMillis());
+				draft.update(this);
+			}
+		}
+		else{
+			if(draft.getContent().length()!=0){
+				draft.setTimeStamp(System.currentTimeMillis());
+				draft.insert(this);
+			}
+		}
+		super.onDestroy();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -175,6 +223,9 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
     
     private void delete_message(int position){
     	Message msg = (Message) getListView().getItemAtPosition(position);
+    	// update in database
+    	msg.delete(this);
+    	// update in UI
     	adapter.remove(position);
     	adapter.notifyDataSetChanged();
     	if(adapter.getCount()==0){
@@ -206,13 +257,19 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 	@Override
 	public void onClick(View v) {
 		if(v.equals(btn_send)){
-			//TODO send message out
+			sendMessage();
+			et_content.setText("");
+			// hide the 
+			InputMethodManager imm = 
+					(InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(et_content.getWindowToken(), 0);
 		}
 	}
 	
 	private TextWatcher contentWatcher = new TextWatcher(){
 		@Override
 		public void afterTextChanged(Editable etd) {
+			draft.setContent(etd.toString());
 			if(etd.length()==0){
 				btn_send.setEnabled(false);
 			}
@@ -231,5 +288,26 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 			// TODO Auto-generated method stub
 			
 		}
+	};
+	
+	private void sendMessage(){
+		//TODO send message out
+		Message sentMsg = new Message(draft);
+		if(localDraft){
+			// insert the new sent message
+			sentMsg.setType(Message.MESSAGE_TYPE_SENT);
+			sentMsg.setTimeStamp(System.currentTimeMillis());
+			sentMsg.insert(this);
+		}
+		else{
+			// update draft to sent message
+			sentMsg.setTimeStamp(System.currentTimeMillis());
+			sentMsg.updateSentDraft(this);
+			// now  we need a new local draft
+			draft = new Message(-1, cid, "", Message.MESSAGE_TYPE_DRAFT, false, 0, null, rec);
+			localDraft = true;
+		}
+		adapter.add(sentMsg);
+		adapter.notifyDataSetChanged();
 	};
 }

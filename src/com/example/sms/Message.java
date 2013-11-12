@@ -1,11 +1,18 @@
 package com.example.sms;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+
 public class Message {
-	public static final int SMS_TYPE_SENT		= 0;
-	public static final int SMS_TYPE_RECEIVED 	= 1;	
-	public static final int SMS_TYPE_DRAFT 		= 2;
-	public static final int SMS_TYPE_PENDING 	= 3;
-	public static final int SMS_TYPE_FAILED 	= 4;
+    public static final int MESSAGE_TYPE_ALL    = 0;
+    public static final int MESSAGE_TYPE_INBOX  = 1;
+    public static final int MESSAGE_TYPE_SENT   = 2;
+    public static final int MESSAGE_TYPE_DRAFT  = 3;
+    public static final int MESSAGE_TYPE_OUTBOX = 4;
+    public static final int MESSAGE_TYPE_FAILED = 5; // for failed outgoing messages
+    public static final int MESSAGE_TYPE_QUEUED = 6; // for messages to send later
 
 	
 	public static final boolean SMS_UNREAD 	= true;
@@ -54,7 +61,7 @@ public class Message {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 	
@@ -62,7 +69,7 @@ public class Message {
 		return conversation_id;
 	}
 
-	public void setConversationId(int cid) {
+	public void setConversationId(long cid) {
 		this.conversation_id = cid;
 	}
 
@@ -149,5 +156,78 @@ public class Message {
 	 * */
 	public Contact getContact(){
 		return (receiver==null)?sender:receiver;
+	}
+	
+	/**
+	 *  Update current message in the database
+	 *  This is usually used by draft
+	 * 
+	 *  Update content, timeStamp
+	 * */
+	public void update(Context context){
+		Uri uriMsg = Uri.parse("content://sms/"+this.id);
+		ContentValues values = new ContentValues();
+		values.put(MessageManager.CONTENT, this.content);
+		values.put(MessageManager.TIMESTAMP, this.timeStamp);
+		
+		context.getContentResolver().update(uriMsg, values, null, null);
+	}
+	
+	/**
+	 *  delete current message in the database
+	 * 
+	 * */
+	public void delete(Context context){
+		Uri uriMsg = Uri.parse("content://sms/"+this.id);
+		context.getContentResolver().delete(uriMsg, null, null);
+	}
+	
+	/**
+	 *  Insert current message in the database
+	 *  
+	 * */
+	public void insert(Context context){
+		Uri uriMsg = Uri.parse("content://sms/");
+		ContentValues values = new ContentValues();
+		if(this.type==Message.MESSAGE_TYPE_DRAFT
+				||this.type==Message.MESSAGE_TYPE_FAILED
+				||this.type==Message.MESSAGE_TYPE_QUEUED
+				||this.type==Message.MESSAGE_TYPE_SENT){
+			values.put(MessageManager.ADDRESS, this.receiver.getPhoneNumber());
+		}
+		else{ //this.type==Message.MESSAGE_TYPE_INBOX
+			values.put(MessageManager.ADDRESS, this.sender.getPhoneNumber());
+		}
+
+		values.put(MessageManager.CONTENT, this.content);
+		values.put(MessageManager.TIMESTAMP, this.timeStamp);
+		values.put(MessageManager.READ, this.content);
+		values.put(MessageManager.TYPE, this.type);
+		values.put(MessageManager.CONVERSATION_ID, this.conversation_id);
+		uriMsg = context.getContentResolver().insert(uriMsg, values);
+		
+		// update the id
+		Cursor cur = context.getContentResolver().query(
+				uriMsg, new String[] {MessageManager.ID}, null, null, null);
+		if(cur!=null){
+			if(cur.moveToFirst()){
+				id = cur.getLong(0);
+			}
+			cur.close();
+		}
+	}
+	
+	/**
+	 *  Update draft to sent message in the database
+	 *  
+	 * */
+	public void updateSentDraft(Context context){
+		Uri uriMsg = Uri.parse("content://sms/"+this.id);
+		ContentValues values = new ContentValues();
+		values.put(MessageManager.TYPE, Message.MESSAGE_TYPE_SENT);
+		values.put(MessageManager.CONTENT, this.content);
+		values.put(MessageManager.TIMESTAMP, this.timeStamp);
+		
+		context.getContentResolver().update(uriMsg, values, null, null);
 	}
 }

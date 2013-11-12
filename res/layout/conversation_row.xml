@@ -27,6 +27,17 @@
         android:layout_toRightOf="@+id/name"
         android:text="10"
         android:textAppearance="?android:attr/textAppearanceMedium" />
+    
+	<TextView
+        android:id="@+id/draft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/name"
+        android:layout_alignBottom="@+id/name"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@+id/count"
+        android:text="Draft"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
         
     <TextView
         android:id="@+id/summary"

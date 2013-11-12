@@ -1,13 +1,8 @@
 package com.example.sms.ui;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -20,7 +15,6 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -117,25 +111,6 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
-	}
-	
-	/**
-	 *	Prepare data for listView 
-	 * 
-	 **/
-	private List<Map<String, Object>> getData(){
-		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-		Map<String, Object> map = null;
-		
-		for(int i=0; i<10; i++){
-			map = new HashMap<String, Object>();
-			map.put("content", "Hello, this is a fake message");
-			map.put("date", "Nov 9");
-			map.put("full_timestamp", "1:33PM Nov 6");
-			map.put("mid", i);
-    		list.add(map);        	
-		}
-        return list;
 	}
 
 	@Override

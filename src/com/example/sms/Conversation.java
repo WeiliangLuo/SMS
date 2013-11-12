@@ -9,19 +9,23 @@ public class Conversation {
 	private Contact contact;
 	private List<Message> messages;
 	private int msgCount;
+	private long timeStamp;
+	private boolean hasUnread;
 	
 	/* Constructors */
-	public Conversation(long id, String summary, Contact contact) {
+	public Conversation(long id, String summary, Contact contact, long timeStamp) {
 		super();
 		this.id = id;
 		this.summary = summary;
 		this.contact = new Contact(contact);
 		this.messages = new ArrayList<Message>();
 		this.msgCount = 0;
+		this.timeStamp = timeStamp;
+		this.hasUnread = false;
 	}
 	
 	public Conversation(Conversation con){
-		this(con.id, con.summary, con.contact);
+		this(con.id, con.summary, con.contact, con.timeStamp);
 		for(Message msg:messages){
 			this.messages.add(msg);
 			this.msgCount++;
@@ -53,6 +57,26 @@ public class Conversation {
 
 	public void setContact(Contact contact) {
 		this.contact = new Contact(contact);
+	}
+	
+	public int getMsgCount(){
+		return this.msgCount;
+	}
+	
+	public void setMsgCount(int msgCount){
+		this.msgCount = msgCount;
+	}
+	
+	public long getTimeStamp(){
+		return this.timeStamp;
+	}
+	
+	public void setTimeStamp(long timeStamp){
+		this.timeStamp = timeStamp;
+	}
+	
+	public void setHasUnread(boolean hasUnread){
+		this.hasUnread = hasUnread;
 	}
 	/* End Getter and Setter */
 
@@ -91,5 +115,9 @@ public class Conversation {
 			}
 		}
 		return matchMsgs;
+	}
+	
+	public boolean hasUnread(){
+		return this.hasUnread;
 	}
 }

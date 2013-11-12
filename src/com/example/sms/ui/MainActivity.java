@@ -1,9 +1,11 @@
 package com.example.sms.ui;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,13 +42,15 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import com.example.sms.Conversation;
+import com.example.sms.MessageManager;
 import com.example.sms.R;
 
 public class MainActivity extends ActionBarActivity implements OnItemClickListener {	
 	private static final String TAG = "MainActivity";
 	private ListView listView;
-	private List<Map<String, Object>> list;
-	private SimpleAdapter adapter;
+	private List<Conversation> conversationList;
+	private ConversationAdapter adapter;
 	
 	private MenuItem searchItem;
 	private SearchView searchView;
@@ -120,12 +124,16 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	    listView.setMultiChoiceModeListener(multiChoiceModeListener);
 	    
 	    // associate data with listView
-		list = getData();
-		adapter = new SimpleAdapter(this, 
-				list,
-				R.layout.conversation_row,
-				new String[]{"name", "count", "summary", "date"},
-				new int[]{R.id.name, R.id.count, R.id.summary, R.id.date});
+	    conversationList = MessageManager.getConversations(this);
+	    // sort conversationList by timeStamp
+	    Collections.sort(conversationList, new Comparator<Conversation>(){
+			public int compare(Conversation o1, Conversation o2){
+				Long l1 = Long.valueOf(o1.getTimeStamp());
+				Long l2 = Long.valueOf(o2.getTimeStamp());
+				return l2.compareTo(l1);
+			}
+		});
+	    adapter = new ConversationAdapter(this, conversationList);
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(this);
 		listView.requestFocus();
@@ -184,13 +192,13 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	@Override
 	public void onItemClick(AdapterView<?> lv, View v, int position, long id) {
 		ListView listView = (ListView) lv;
-		Map<String, Object> ob = (Map<String, Object>) listView.getItemAtPosition(position);
+		Conversation c = (Conversation) listView.getItemAtPosition(position);
         Intent intent = new Intent(MainActivity.this,
                 MessageListActivity.class);
-        intent.putExtra("cid", Integer.parseInt(ob.get("cid").toString()));
+        intent.putExtra("cid", c.getId());
         startActivity(intent);
 		
-		Log.e("Test", ob.get("cid").toString());
+		Log.e("Test", String.valueOf(c.getId()));
 	}
 
 	/**
@@ -219,17 +227,19 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	 * 
 	 **/
 	private List<Map<String, Object>> getData(){
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d");
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		Map<String, Object> map = null;
-		
-		for(int i=0; i<10; i++){
+
+		for(Conversation c:conversationList){
 			map = new HashMap<String, Object>();
-			map.put("name", "Weiliang Luo");
-			map.put("count", i);
-			map.put("summary", "This is the "+i+"th message so good it is haha");
-			map.put("date", "Nov 6");
-			map.put("cid", i);
-    		list.add(map);        	
+			map.put("name", c.getContact().getNameOrNumber());
+			map.put("count", c.getMsgCount());
+			map.put("summary", c.getSummary());
+			map.put("cid", c.getId());
+			Date date = new Date(c.getTimeStamp());
+			map.put("date", dateFormat.format(date));
+    		list.add(map);
 		}
         return list;
 	}
@@ -262,12 +272,12 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	    			});
 	    			for(Integer pos:checkedPositions){
 	    				Log.i(TAG, "Remove data from list"+pos.toString());
-	    				list.remove(pos.intValue());
+	    				adapter.remove(pos.intValue());
 	    			}
     			}
     			// delete all items
     			else{
-    				list.clear();
+    				adapter.clear();
     			}
     			adapter.notifyDataSetChanged();
     			Log.i(TAG, "conversations deleted");

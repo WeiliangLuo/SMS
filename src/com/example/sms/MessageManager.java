@@ -10,6 +10,13 @@ import android.util.Log;
 
 public class MessageManager {
 	private static final String TAG = "MessageManager";
+	
+	public static final String CONVERSATION_ID = "thread_id";
+	public static final String MESSAGE_COUNT = "msg_count";
+	public static final String SNIPPET = "snippet";
+	public static final String TIMESTAMP = "date";
+	public static final String ADDRESS = "address";
+	
 	/**
 	 * Function to be called when new message is received
 	 * 
@@ -105,24 +112,68 @@ public class MessageManager {
 	 * List all conversations in database
 	 * 
 	 * */
-	public static List<Conversation> listConversations(Context context){
-		Uri uri = Uri.parse("content://sms/conversations");
-		Cursor cur = context.getContentResolver().query(
-				uri, 
-				null, 
+	public static List<Conversation> getConversations(Context context){
+		List<Conversation> res = new ArrayList<Conversation>();
+		Uri uriCon = Uri.parse("content://sms/conversations");
+		Cursor curCon = context.getContentResolver().query(
+				uriCon, 
+				null,
 				null, 
 				null, 
 				null);
-		if(cur!=null){
-			if(cur.moveToFirst()){
+		if(curCon!=null){
+			if(curCon.moveToFirst()){
 				do{
-					Log.i(TAG, cur.getColumnNames().toString());
+					// +conversation_id
+					// +message_count
+					// +summary
+					long cid = curCon.getLong(curCon.getColumnIndex(MessageManager.CONVERSATION_ID));
+					int msgCount = curCon.getInt(curCon.getColumnIndex(MessageManager.MESSAGE_COUNT));
+					String summary = curCon.getString(curCon.getColumnIndex(MessageManager.SNIPPET));
+					// +address
+					// +timeStamp
+					String address = "";
+					long timeStamp = 0;
+					Uri uriMsg = Uri.parse("content://sms/conversations/"+cid);
+					Cursor curMsg = context.getContentResolver().query(
+							uriMsg, 
+							new String[] {MessageManager.ADDRESS, MessageManager.TIMESTAMP},
+							null, 
+							null, 
+							MessageManager.TIMESTAMP+" DESC");
+					if(curMsg!=null){
+						if(curMsg.moveToFirst()){
+							address = curMsg.getString(0);
+							timeStamp = curMsg.getLong(1);
+						}
+						curMsg.close();
+					}
+					// +hasUnread
+					boolean hasUnread = false;
+					curMsg = context.getContentResolver().query(
+							uriMsg, 
+							new String[] { MessageManager.ADDRESS },
+							"read=?", 
+							new String[] {"0"}, 
+							null);
+					if(curMsg!=null){
+						if(curMsg.moveToFirst()){
+							hasUnread = true;
+						}
+						curMsg.close();
+					}
+					// create conversation instance
+					Contact contact = ContactManager.getContactByNumber(context, address);
+					Conversation c = new Conversation(cid, summary, contact, timeStamp);
+					c.setMsgCount(msgCount);
+					c.setHasUnread(hasUnread);
+					res.add(c);
 				}
-				while(cur.moveToNext());
+				while(curCon.moveToNext());
 			}
-			cur.close();
+			curCon.close();
 		}
-		return null;
+		return res;
 	}
 	
 	/**

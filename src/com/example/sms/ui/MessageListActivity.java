@@ -73,11 +73,15 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 		// initialize conversation data
 		Intent intent = getIntent();
 		cid = intent.getLongExtra("cid", 0);
+		Log.i(TAG, String.valueOf(cid));
 		draft = MessageManager.getDraftInCoversation(this, cid);
 		initData();
-		
+
 		// if there is no sent/received message
 		// the draft can not be null
+		if(messages.size()==0 && draft==null){
+			Log.e(TAG, "There must be some message or a draft in conversation "+cid);
+		}
 		if(messages.size()!=0){
 			rec = messages.get(0).getContact();
 		}

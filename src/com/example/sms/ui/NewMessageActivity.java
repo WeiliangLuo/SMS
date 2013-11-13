@@ -198,7 +198,7 @@ public class NewMessageActivity extends Activity implements OnClickListener {
 				// input must be all numberic characters.
 				if(to.matches("^[0-9]+$")){
 					number = to;
-				}	
+				}
 			}
 		}
 		return number;
@@ -224,8 +224,6 @@ public class NewMessageActivity extends Activity implements OnClickListener {
 		// send message
 		MessageManager.sendMessage(sentMsg);
 		sentMsg.insert(this);
-
-		Log.i(TAG, "cid:"+cid);
 		return true;
 	}
 }

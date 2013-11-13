@@ -315,7 +315,12 @@ public class MessageManager {
 				}
 				cur.close();
 			}
+			// no entry in the database, start the id from 10 in case smaller numbers are reserved
+			if(cid==-1){
+				cid=10;
+			}
 		}
+
 		return cid;
 	}
 }

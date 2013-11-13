@@ -35,6 +35,8 @@ import com.example.sms.MessageManager;
 import com.example.sms.R;
 
 public class MessageListActivity extends ListActivity implements OnItemClickListener, OnClickListener{
+	private static final String TAG = "MessageListActivity";
+	
 	private Contact rec;
 	private long cid;
 	private List<Message> messages;
@@ -44,7 +46,7 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 	private boolean localDraft;
 	private Message draft;
 
-	private ImageButton btn_send; 
+	private ImageButton btn_send;
 	private EditText et_content;
 	private MessageAdapter adapter;
 	
@@ -63,6 +65,9 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 		long cid = intent.getLongExtra("cid", 0);
 		messages = MessageManager.getMessagesInCoversation(this, cid);
 		draft = MessageManager.getDraftInCoversation(this, cid);
+		
+		// set all messages read
+		setMessagesRead();
 		
 		// if there is no sent/received message
 		// the draft can not be null
@@ -292,6 +297,7 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 	
 	private void sendMessage(){
 		//TODO send message out
+		MessageManager.sendMessage(draft);
 		Message sentMsg = new Message(draft);
 		if(localDraft){
 			// insert the new sent message
@@ -310,4 +316,13 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 		adapter.add(sentMsg);
 		adapter.notifyDataSetChanged();
 	};
+	
+	private void setMessagesRead(){
+		for(Message msg:messages){
+			if(msg.isUnread()){
+				msg.setUnread(Message.SMS_READ);
+				msg.update(this);
+			}
+		}
+	}
 }

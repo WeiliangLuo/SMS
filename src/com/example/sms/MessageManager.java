@@ -6,7 +6,7 @@ import java.util.List;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
+import android.telephony.SmsManager;
 
 public class MessageManager {
 	private static final String TAG = "MessageManager";
@@ -28,21 +28,19 @@ public class MessageManager {
 	 * Function to be called when new message is received
 	 * 
 	 **/
-	public static void receiveMessage(Context context, String address, String body, long timeStamp){
-		Contact sender = ContactManager.getContactByNumber(context, address);
+	public static void receiveMessage(Context context, String number, String body, long timeStamp){
+		Contact sender = ContactManager.getContactByNumber(context, number);
+		long cid = getOrCreateConversationId(context, number);
 		Message msg = new Message(-1,
-								-1,
+								cid,
 								body, 
 								Message.MESSAGE_TYPE_INBOX, 
-								Message.SMS_UNREAD, 
+								Message.SMS_UNREAD,
 								timeStamp, 
 								sender,
 								null);
-		// TODO save 
+		// save the message into  
 		msg.insert(context);
-		// int mid = saveReceivedMessage(msg);
-		// int cid = ?
-		//msg.setId(mid);
 	}
 	
 	/**
@@ -50,7 +48,8 @@ public class MessageManager {
 	 * 	
 	 **/
 	public static void sendMessage(Message msg){
-		
+		SmsManager sms = SmsManager.getDefault();
+		sms.sendTextMessage(msg.getReceiver().getPhoneNumber(), null, msg.getContent(), null, null);
 	}
 	
 	/**
@@ -66,7 +65,7 @@ public class MessageManager {
 	/**
 	 * List messages (sent/received) belong to the given conversation 
 	 * 
-	 * @param condId Conversation Id
+	 * @param cid Conversation Id
 	 * @return List of messages belong to conversation
 	 **/
 	
@@ -84,7 +83,7 @@ public class MessageManager {
 				uriMsg, 
 				cols,
 				MessageManager.TYPE+"=? or "+ MessageManager.TYPE+"=?", 
-				new String[] {"1" /* MESSAGE_TYPE_INBOX */, "2" /* MESSAGE_TYPE_SENT */}, 
+				new String[] {String.valueOf(Message.MESSAGE_TYPE_INBOX), String.valueOf(Message.MESSAGE_TYPE_SENT)}, 
 				MessageManager.TIMESTAMP+" ASC");
 		
 		if(curMsg!=null){
@@ -120,7 +119,7 @@ public class MessageManager {
 	/**
 	 * List draft belong to the given conversation 
 	 * 
-	 * @param condId Conversation Id
+	 * @param cid Conversation Id
 	 * @return draft belong to conversation
 	 **/
 	public static Message getDraftInCoversation(Context context, long cid){
@@ -129,7 +128,7 @@ public class MessageManager {
 				uriMsg,
 				new String[] {MessageManager.ID, MessageManager.ADDRESS, MessageManager.CONTENT, MessageManager.TIMESTAMP},
 				MessageManager.TYPE+"=?",
-				new String[] {"3" /* MESSAGE_TYPE_DRAFT */},
+				new String[] {String.valueOf(Message.MESSAGE_TYPE_DRAFT)},
 				null);
 		if(curMsg!=null){
 			// There is only one (or no) draft per conversation
@@ -213,7 +212,7 @@ public class MessageManager {
 							uriMsg, 
 							new String[] { MessageManager.ADDRESS },
 							MessageManager.TYPE+"=?", 
-							new String[] {"3" /* MESSAGE_TYPE_DRAFT */},
+							new String[] {String.valueOf(Message.MESSAGE_TYPE_DRAFT)},
 							null);
 					if(curMsg!=null){
 						if(curMsg.moveToFirst()){
@@ -240,35 +239,44 @@ public class MessageManager {
 	 * Search through message database
 	 * 
 	 * */
-	public static List<Message> searchMessages(String query){
+	public static List<Message> searchMessages(Context context, String query){
 		List<Message> messages = new ArrayList<Message>();
-		Contact rec = new Contact(1, null, "2106302912");
-		for(int i=0; i<6; i++){
-			if(i%2==0){
-				Message msg = new Message(i,
-						-1,
-						"Message from me, this is a very nice day. We are going to picnic tommorrow." +
-						"I am so happy. How are u doing?", 
-						Message.MESSAGE_TYPE_SENT, 
-						Message.SMS_READ, 
-						12345678, 
-						null,
-						rec);
-				messages.add(msg);
+		Uri uriMsg = Uri.parse("content://sms");
+		
+		String[] cols = new String[] {MessageManager.ID, 
+				MessageManager.ADDRESS, 
+				MessageManager.CONTENT,
+				MessageManager.TIMESTAMP,
+				MessageManager.TYPE,
+				MessageManager.CONVERSATION_ID};
+		
+		// use LIKE query to search through all messages
+		Cursor curMsg = context.getContentResolver().query(
+				uriMsg, 
+				cols,
+				MessageManager.CONTENT+" LIKE '%"+query+"%'", 
+				null, 
+				MessageManager.TIMESTAMP+" DESC");
+		if(curMsg!=null){
+			if(curMsg.moveToFirst()){
+				do{
+					long id = curMsg.getLong(0);
+					String address = curMsg.getString(1);
+					String content = curMsg.getString(2);
+					long timeStamp = curMsg.getLong(3);
+					int type = curMsg.getInt(4);
+					long cid = curMsg.getLong(5);
+					Contact contact = ContactManager.getContactByNumber(context, address);
+					// for searchActivity it really doesn't matter if its an outgoing or incoming message
+					// the cid will lead user to messageListActivity that the message belongs to.
+					Message msg = new Message(id, cid, content, type, Message.SMS_READ, timeStamp, contact, contact);
+					messages.add(msg);
+				}
+				while(curMsg.moveToNext());
 			}
-			else{
-				Message msg = new Message(i,
-						-1,
-						"Replied message from Bob", 
-						Message.MESSAGE_TYPE_INBOX, 
-						Message.SMS_READ, 
-						123456789, 
-						rec,
-						null);
-				messages.add(msg);
-			}
+			curMsg.close();
 		}
-		return messages;	
+		return messages;
 	}
 
 	/**
@@ -292,7 +300,7 @@ public class MessageManager {
 			cur.close();
 		}
 		
-		// Allocate new conversation_id
+		// Allocate new conversation_id if no match
 		if(cid==-1){
 			cur = context.getContentResolver().query(
 					uri, 

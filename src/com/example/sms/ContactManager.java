@@ -7,6 +7,8 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 
 public class ContactManager {
+	private final static String TAG = "ContactManager";
+	
 	/**
 	 * Look for contact that match given number
 	 * Return null if no match is found

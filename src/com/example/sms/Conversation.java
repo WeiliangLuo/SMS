@@ -7,6 +7,8 @@ import android.content.Context;
 import android.net.Uri;
 
 public class Conversation {
+	private static final String TAG = "Conversation";
+
 	private long id;
 	private String summary;
 	private Contact contact;
@@ -84,8 +86,16 @@ public class Conversation {
 		this.hasUnread = hasUnread;
 	}
 	
+	public boolean hasUnread(){
+		return this.hasUnread;
+	}
+
 	public void setHasDraft(boolean hasDraft){
 		this.hasDraft = hasDraft;
+	}
+	
+	public boolean hasDraft(){
+		return this.hasDraft;
 	}
 	/* End Getter and Setter */
 
@@ -109,33 +119,9 @@ public class Conversation {
 			this.msgCount--;
 		}
 	}
-	
+
 	/**
-	 *  Search through messages within the conversation
-	 *  for given keyword
-	 * 
-	 * 	@return List of messages contain the keyword
-	 */
-	public List<Message> searchMessage(String keyword){
-		List<Message> matchMsgs = new ArrayList<Message>();
-		for(Message msg:messages ){
-			if(msg.searchMessage(keyword)){
-				matchMsgs.add(msg);	
-			}
-		}
-		return matchMsgs;
-	}
-	
-	public boolean hasUnread(){
-		return this.hasUnread;
-	}
-	
-	public boolean hasDraft(){
-		return this.hasDraft;
-	}
-	
-	/**
-	 *  delete current message in the database
+	 *  delete all messages belong to this conversation in the database
 	 * 
 	 * */
 	public void delete(Context context){

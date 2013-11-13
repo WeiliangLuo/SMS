@@ -13,9 +13,12 @@ import com.example.sms.ui.MainActivity;
 
 
 public class MessageReceiver extends BroadcastReceiver {
+	private static final String TAG = "MessageReceiver";
+
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		if (intent.getAction() == "android.provider.Telephony.SMS_RECEIVED") {
+		if (intent.getAction() == Constant.SMS_RECEIVED) {
+            abortBroadcast();
             // Parse new message
 			Bundle bundle = intent.getExtras();
             if (bundle != null) {
@@ -31,33 +34,40 @@ public class MessageReceiver extends BroadcastReceiver {
                     
                     // handle new message (save new message to database)
                     MessageManager.receiveMessage(context, address, body, timeStamp);
-                    String name = ContactManager.getContactByNumber(context, address).getNameOrNumber();
-                    // notify user if this app is NOT running foreground
-                    // TODO delete notification if this app is launched by the user.
-            		NotificationCompat.Builder mBuilder =
-            		        new NotificationCompat.Builder(context)
-            		        .setSmallIcon(R.drawable.ic_notification)
-            		        .setContentTitle(name)
-            		        .setContentText(body);
-            		// Creates an explicit intent for an Activity in your app
-            		Intent resultIntent = new Intent(context, MainActivity.class);
-
-            		PendingIntent resultPendingIntent =
-            			    PendingIntent.getActivity(
-            			    context,
-            			    0,
-            			    resultIntent,
-            			    PendingIntent.FLAG_UPDATE_CURRENT
-            			);
-            		mBuilder.setContentIntent(resultPendingIntent);
-            		NotificationManager mNotificationManager =
-            		    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            		// mId allows you to update the notification later on.
-            		int mId = Constant.NOTIFICATION_ID;
-            		mNotificationManager.notify(mId, mBuilder.build());
-                    abortBroadcast();
+                    // set status bar notification
+                    sendNotification(context, address, body);
                 }
             }
         }
+	}
+	
+	private void sendNotification(Context context, String address, String body){
+		String name = ContactManager.getContactByNumber(context, address).getNameOrNumber();
+        // notify user if this app is NOT running foreground
+        // TODO delete notification if this app is launched by the user.
+		NotificationCompat.Builder mBuilder =
+		        new NotificationCompat.Builder(context)
+		        .setSmallIcon(R.drawable.ic_notification)
+		        .setContentTitle(name)
+		        .setContentText(body);
+		
+		// Creates an explicit intent for an Activity in your app
+		Intent resultIntent = new Intent(context, MainActivity.class);
+		PendingIntent resultPendingIntent =
+			    PendingIntent.getActivity(
+			    context,
+			    0,
+			    resultIntent,
+			    PendingIntent.FLAG_UPDATE_CURRENT
+			);
+		mBuilder.setContentIntent(resultPendingIntent);
+		
+		// disappear after clicked
+		mBuilder.setAutoCancel(true);
+		NotificationManager mNotificationManager =
+		    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		// mId allows you to update the notification later on.
+		int mId = Constant.NOTIFICATION_ID;
+		mNotificationManager.notify(mId, mBuilder.build());
 	}
 }

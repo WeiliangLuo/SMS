@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.net.Uri;
 
 public class Message {
+	private static final String TAG = "Message";
+	
     public static final int MESSAGE_TYPE_ALL    = 0;
     public static final int MESSAGE_TYPE_INBOX  = 1;
     public static final int MESSAGE_TYPE_SENT   = 2;
@@ -23,13 +25,13 @@ public class Message {
 	private String content;
 	// Epoch time
 	private long timeStamp;
-	// SENT:		Message sent by user	
-	// RECEIVED:	Message received by user
-	// DRAFT:		Draft message (At most 1 per conversation)
-	// PENDING:		Message being/to be sent from the user
-	// FAILED:		Message failed to be sent
+	// MESSAGE_TYPE_SENT:		Message sent by user	
+	// MESSAGE_TYPE_INBOX:		Message received by user
+	// MESSAGE_TYPE_DRAFT:		Draft message (At most 1 per conversation)
+	// MESSAGE_TYPE_QUEUED:		Message being/to be sent from the user
+	// MESSAGE_TYPE_FAILED:		Message failed to be sent
 	private int type;
-	// Indicating if message has been read (For RECEIVED message only) 
+	// Indicating if message has been read (For MESSAGE_TYPE_INBOX message only) 
 	private boolean unread;
 	
 	// one of them will be null (the user)
@@ -121,22 +123,10 @@ public class Message {
 		this.receiver = (receiver==null)?null:new Contact(receiver);
 	}
 	/* End Getter and Setter */
-
-	/**
-	 *	Search keyword through the message content
-	 *	
-	 * 	@return true if found, false if not found
-	 **/
-	public boolean searchMessage(String keyword){
-		if(content.toLowerCase().contains(keyword.toLowerCase()))
-			return true;
-		return false;
-	}
 	
 	/**
 	 * 	Compare this message with another one
 	 * 	
-	 * 
 	 **/
 	public boolean equals(Message msg){
 		return msg.id == id;
@@ -160,15 +150,16 @@ public class Message {
 	
 	/**
 	 *  Update current message in the database
-	 *  This is usually used by draft
+	 *  This is usually used by draft/received msg
 	 * 
-	 *  Update content, timeStamp
+	 *  Update content, timeStamp, read(unread) status
 	 * */
 	public void update(Context context){
 		Uri uriMsg = Uri.parse("content://sms/"+this.id);
 		ContentValues values = new ContentValues();
 		values.put(MessageManager.CONTENT, this.content);
 		values.put(MessageManager.TIMESTAMP, this.timeStamp);
+		values.put(MessageManager.READ, this.unread?0:1);
 		
 		context.getContentResolver().update(uriMsg, values, null, null);
 	}
@@ -201,7 +192,7 @@ public class Message {
 
 		values.put(MessageManager.CONTENT, this.content);
 		values.put(MessageManager.TIMESTAMP, this.timeStamp);
-		values.put(MessageManager.READ, this.content);
+		values.put(MessageManager.READ, this.unread?0:1);
 		values.put(MessageManager.TYPE, this.type);
 		values.put(MessageManager.CONVERSATION_ID, this.conversation_id);
 		uriMsg = context.getContentResolver().insert(uriMsg, values);
@@ -223,6 +214,7 @@ public class Message {
 	 * */
 	public void updateSentDraft(Context context){
 		Uri uriMsg = Uri.parse("content://sms/"+this.id);
+		
 		ContentValues values = new ContentValues();
 		values.put(MessageManager.TYPE, Message.MESSAGE_TYPE_SENT);
 		values.put(MessageManager.CONTENT, this.content);

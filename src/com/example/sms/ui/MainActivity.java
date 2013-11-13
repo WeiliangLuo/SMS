@@ -36,6 +36,7 @@ import com.example.sms.R;
 
 public class MainActivity extends ActionBarActivity implements OnItemClickListener {	
 	private static final String TAG = "MainActivity";
+	
 	private ListView listView;
 	private List<Conversation> conversationList;
 	private ConversationAdapter adapter;

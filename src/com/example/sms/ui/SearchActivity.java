@@ -9,13 +9,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.example.sms.Message;
 import com.example.sms.MessageManager;
 import com.example.sms.R;
 
-public class SearchActivity extends ListActivity {
+public class SearchActivity extends ListActivity implements OnItemClickListener {
+	private final static String TAG = "SearchActivity";
+	
 	private List<Message> messages;
 	private MessageAdapter adapter;
 	private int count;
@@ -30,13 +35,13 @@ public class SearchActivity extends ListActivity {
 		Intent intent = getIntent();
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
 			query = intent.getStringExtra(SearchManager.QUERY);
-			// TODO doMySearch(query);
-			messages = MessageManager.searchMessages(query);
+			messages = MessageManager.searchMessages(this, query);
 			count = messages.size();
 			  
 			// display search result
 			adapter = new MessageAdapter(this, messages, MessageAdapter.TYPE_BASIC);
 			setListAdapter(adapter);
+			getListView().setOnItemClickListener(this);
 		}
 		
 		// show up button 
@@ -63,5 +68,15 @@ public class SearchActivity extends ListActivity {
         }
         return false;
     }
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
+		Message msg = (Message) adapter.getItem(pos);
+		long cid = msg.getConversationId();
+		Intent intent = new Intent(SearchActivity.this,
+                MessageListActivity.class);
+        intent.putExtra("cid", cid);
+        startActivity(intent);
+	}
 
 }

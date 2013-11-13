@@ -212,6 +212,7 @@ public class NewMessageActivity extends Activity implements OnClickListener {
 			return false;
 		}
 		
+		// update database
 		cid = MessageManager.getOrCreateConversationId(this, number);
 		Contact receiver = ContactManager.getContactByNumber(this, number);
 		Message sentMsg = new Message(draft);
@@ -219,6 +220,9 @@ public class NewMessageActivity extends Activity implements OnClickListener {
 		sentMsg.setReceiver(receiver);
 		sentMsg.setType(Message.MESSAGE_TYPE_SENT);
 		sentMsg.setTimeStamp(System.currentTimeMillis());
+		
+		// send message
+		MessageManager.sendMessage(sentMsg);
 		sentMsg.insert(this);
 
 		Log.i(TAG, "cid:"+cid);

@@ -15,7 +15,11 @@ import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -40,6 +44,8 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	private ListView listView;
 	private List<Conversation> conversationList;
 	private ConversationAdapter adapter;
+	private ContentObserver observer;
+	private Handler mHandler;
 	
 	private MenuItem searchItem;
 	private SearchView searchView;
@@ -107,30 +113,32 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		mHandler = new Handler();
+		
 		setContentView(R.layout.activity_main);
 	    listView = (ListView) findViewById(R.id.listview);
 	    listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 	    listView.setMultiChoiceModeListener(multiChoiceModeListener);
 		listView.setOnItemClickListener(this);
+		initData();
 		listView.requestFocus();
 	}
 
 	@Override
 	public void onResume(){
-	    // associate data with listView
-	    conversationList = MessageManager.getConversations(this);
-	    // sort conversationList by timeStamp
-	    Collections.sort(conversationList, new Comparator<Conversation>(){
-			public int compare(Conversation o1, Conversation o2){
-				Long l1 = Long.valueOf(o1.getTimeStamp());
-				Long l2 = Long.valueOf(o2.getTimeStamp());
-				return l2.compareTo(l1);
-			}
-		});
-	    adapter = new ConversationAdapter(this, conversationList);
-		listView.setAdapter(adapter);
+	    observer = new SmsObserver(mHandler);//new SmsObserver(new Handler(workThread.getLooper()));
+	    Uri uri = Uri.parse("content://sms/");
+	    this.getContentResolver().registerContentObserver(uri, true, observer);	    
 		super.onResume();
 	}
+	
+	@Override
+	public void onPause(){
+		this.getContentResolver().unregisterContentObserver(observer);
+		super.onPause();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -216,22 +224,19 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	 *	Prepare data for listView 
 	 * 
 	 **/
-	private List<Map<String, Object>> getData(){
-		SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d");
-		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-		Map<String, Object> map = null;
-
-		for(Conversation c:conversationList){
-			map = new HashMap<String, Object>();
-			map.put("name", c.getContact().getNameOrNumber());
-			map.put("count", c.getMsgCount());
-			map.put("summary", c.getSummary());
-			map.put("cid", c.getId());
-			Date date = new Date(c.getTimeStamp());
-			map.put("date", dateFormat.format(date));
-    		list.add(map);
-		}
-        return list;
+	private void initData(){
+	    // associate data with listView
+	    conversationList = MessageManager.getConversations(this);
+	    // sort conversationList by timeStamp
+	    Collections.sort(conversationList, new Comparator<Conversation>(){
+			public int compare(Conversation o1, Conversation o2){
+				Long l1 = Long.valueOf(o1.getTimeStamp());
+				Long l2 = Long.valueOf(o2.getTimeStamp());
+				return l2.compareTo(l1);
+			}
+		});
+	    adapter = new ConversationAdapter(this, conversationList);
+		listView.setAdapter(adapter);
 	}
 	
 	/**
@@ -279,5 +284,29 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
     		}
     	});
     	alert.show();
+	}
+	
+	/**
+	 *  ContentObserver to receive notification when SMS database changed
+	 * 
+	 * */
+	class SmsObserver extends ContentObserver{
+		public SmsObserver(){
+			super(null);
+		}
+		
+		public SmsObserver(Handler handler){
+			super(handler);
+		}
+		
+		@Override
+		public void onChange(boolean selfChange) {
+			this.onChange(selfChange, null);
+		}
+
+		@Override
+		public void onChange(boolean selfChange, Uri uri) {
+			initData();
+		}
 	}
 }

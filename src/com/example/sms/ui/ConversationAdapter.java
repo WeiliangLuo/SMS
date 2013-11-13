@@ -96,7 +96,7 @@ public class ConversationAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * remove data item from messageAdapter
+	 * remove data item from Adapter
 	 * 
 	 **/
 	public void remove(int position){
@@ -104,7 +104,7 @@ public class ConversationAdapter extends BaseAdapter {
 	}
 	
 	/**
-	 * remove all data items from messageAdapter
+	 * remove all data items from Adapter
 	 * 
 	 **/
 	public void clear(){
@@ -112,7 +112,7 @@ public class ConversationAdapter extends BaseAdapter {
 	}
 	
 	/**
-	 * add data item to messageAdapter
+	 * add data item to Adapter
 	 * 
 	 **/
 	public void add(Conversation c){

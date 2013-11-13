@@ -123,6 +123,7 @@ public class MessageManager {
 	 * @return draft belong to conversation
 	 **/
 	public static Message getDraftInCoversation(Context context, long cid){
+		Message draft = null;
 		Uri uriMsg = Uri.parse("content://sms/conversations/"+cid);
 		Cursor curMsg = context.getContentResolver().query(
 				uriMsg,
@@ -138,12 +139,11 @@ public class MessageManager {
 				String body = curMsg.getString(2);
 				long timeStamp = curMsg.getLong(3);
 				Contact rec = ContactManager.getContactByNumber(context, address);
-				Message draft = new Message(id, cid, body, Message.MESSAGE_TYPE_DRAFT, Message.SMS_READ, timeStamp, null, rec);
-				return draft;
+				draft = new Message(id, cid, body, Message.MESSAGE_TYPE_DRAFT, Message.SMS_READ, timeStamp, null, rec);
 			}
 			curMsg.close();
 		}
-		return null;
+		return draft;
 	}
 	
 	/**

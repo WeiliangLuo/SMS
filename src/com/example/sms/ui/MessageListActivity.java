@@ -10,12 +10,16 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -33,6 +37,7 @@ import com.example.sms.Contact;
 import com.example.sms.Message;
 import com.example.sms.MessageManager;
 import com.example.sms.R;
+import com.example.sms.ui.MainActivity.SmsObserver;
 
 public class MessageListActivity extends ListActivity implements OnItemClickListener, OnClickListener{
 	private static final String TAG = "MessageListActivity";
@@ -40,6 +45,9 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 	private Contact rec;
 	private long cid;
 	private List<Message> messages;
+	private SmsObserver observer;
+	private Handler mHandler;
+	
 	// We need to keep track of draft, while user is editing it 
 	//   update draft to sent in db, when draft is sent.
 	//   update draft when this activity is destroyed.
@@ -53,6 +61,8 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mHandler = new Handler();
+		
 		setContentView(R.layout.activity_message_list);
 		btn_send = (ImageButton) findViewById(R.id.btn_send);
 		et_content = (EditText) findViewById(R.id.text_content);
@@ -62,12 +72,9 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 
 		// initialize conversation data
 		Intent intent = getIntent();
-		long cid = intent.getLongExtra("cid", 0);
-		messages = MessageManager.getMessagesInCoversation(this, cid);
+		cid = intent.getLongExtra("cid", 0);
 		draft = MessageManager.getDraftInCoversation(this, cid);
-		
-		// set all messages read
-		setMessagesRead();
+		initData();
 		
 		// if there is no sent/received message
 		// the draft can not be null
@@ -102,16 +109,36 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 		else{
 			actionBar.setTitle(rec.getPhoneNumber());
 		}
-			    
-	    // associate data with listView
-		adapter = new MessageAdapter(this, messages, MessageAdapter.TYPE_BUBLE);
-		setListAdapter(adapter);
+
 		getListView().setOnItemClickListener(this);
 		getListView().requestFocus();
-		getListView().setSelectionFromTop(adapter.getCount(), 0);
 		registerForContextMenu(getListView());
 	}
 
+	private void initData(){
+		messages = MessageManager.getMessagesInCoversation(this, cid);
+		// set all messages read
+		setMessagesRead();
+	    // associate data with listView
+		adapter = new MessageAdapter(this, messages, MessageAdapter.TYPE_BUBLE);
+		setListAdapter(adapter);
+		getListView().setSelectionFromTop(adapter.getCount(), 0);
+	}
+	
+	@Override
+	public void onResume(){
+	    observer = new SmsObserver(mHandler);//new SmsObserver(new Handler(workThread.getLooper()));
+	    Uri uri = Uri.parse("content://sms/");
+	    this.getContentResolver().registerContentObserver(uri, true, observer);	    
+		super.onResume();
+	}
+	
+	@Override
+	public void onPause(){
+		this.getContentResolver().unregisterContentObserver(observer);
+		super.onPause();
+	}
+	
 	@Override
 	public void onDestroy(){
 		if(!localDraft){
@@ -323,6 +350,30 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 				msg.setUnread(Message.SMS_READ);
 				msg.update(this);
 			}
+		}
+	}
+	
+	/**
+	 *  ContentObserver to receive notification when SMS database changed
+	 * 
+	 * */
+	class SmsObserver extends ContentObserver{
+		public SmsObserver(){
+			super(null);
+		}
+		
+		public SmsObserver(Handler handler){
+			super(handler);
+		}
+		
+		@Override
+		public void onChange(boolean selfChange) {
+			this.onChange(selfChange, null);
+		}
+
+		@Override
+		public void onChange(boolean selfChange, Uri uri) {
+			initData();
 		}
 	}
 }

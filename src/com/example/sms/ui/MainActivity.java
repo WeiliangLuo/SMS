@@ -264,6 +264,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
 	    				}
 	    			});
 	    			for(Integer pos:checkedPositions){
+	    				// delete in database
 	    				Conversation c = (Conversation) adapter.getItem(pos);
 	    				c.delete(MainActivity.this);
 	    				// Update UI
@@ -272,6 +273,12 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
     			}
     			// delete all items
     			else{
+    				// delete in database
+    				for(int pos=0; pos<adapter.getCount(); pos++){
+    					Conversation c = (Conversation) adapter.getItem(pos);
+    					c.delete(MainActivity.this);
+    				}
+    				// update UI
     				adapter.clear();
     			}
     			adapter.notifyDataSetChanged();

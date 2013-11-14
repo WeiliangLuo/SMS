@@ -1,8 +1,9 @@
 package com.example.sms.ui;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -12,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.sms.Conversation;
@@ -57,7 +57,7 @@ public class ConversationAdapter extends BaseAdapter {
         	holder.draft = (TextView) convertView.findViewById(R.id.draft);
         	holder.summary = (TextView) convertView.findViewById(R.id.summary);
         	holder.date = (TextView) convertView.findViewById(R.id.date);
-        	holder.relativeLayout = (RelativeLayout) convertView.findViewById(R.id.relativeLayout);
+        	//holder.relativeLayout = (RelativeLayout) convertView.findViewById(R.id.relativeLayout);
         	
         	holder.draft.setTextColor(Color.RED);
         	holder.count.setTextColor(Color.GRAY);
@@ -72,9 +72,24 @@ public class ConversationAdapter extends BaseAdapter {
         holder.count.setText(String.valueOf(c.getMsgCount()));
         holder.summary.setText(c.getSummary());
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d");
-		Date date = new Date(c.getTimeStamp());
-        holder.date.setText(dateFormat.format(date));
+        // Set up time display format
+        Calendar date = Calendar.getInstance();
+        date.setTimeInMillis(c.getTimeStamp());
+        Calendar curDate = Calendar.getInstance();
+        curDate.setTimeInMillis(System.currentTimeMillis());   
+		SimpleDateFormat dateFormat = null;
+		if(date.get(Calendar.YEAR)==curDate.get(Calendar.YEAR)){
+			if(date.get(Calendar.DAY_OF_YEAR) == curDate.get(Calendar.DAY_OF_YEAR) ){
+				dateFormat = new SimpleDateFormat("h:mm a", Locale.US);
+			}
+			else{
+				dateFormat = new SimpleDateFormat("MMM d", Locale.US);
+			}
+		}
+		else{
+			dateFormat = new SimpleDateFormat("MMM yyyy", Locale.US);
+		}
+        holder.date.setText(dateFormat.format(c.getTimeStamp()));
 
         
         if(c.hasUnread()){
@@ -125,6 +140,6 @@ public class ConversationAdapter extends BaseAdapter {
 		TextView draft;
 		TextView summary;
 		TextView date;
-		RelativeLayout relativeLayout;
+		//RelativeLayout relativeLayout;
 	}	
 }

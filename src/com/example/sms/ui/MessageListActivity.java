@@ -1,8 +1,10 @@
 package com.example.sms.ui;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -273,16 +275,25 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 		String detail = "";
 		
 		Message msg = (Message) getListView().getItemAtPosition(position);
-		Date date = new Date(msg.getTimeStamp());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, h:m a");
+		Calendar date = Calendar.getInstance();
+		date.setTimeInMillis(msg.getTimeStamp());
+		Calendar curDate = Calendar.getInstance();
+		curDate.setTimeInMillis(System.currentTimeMillis());
+		SimpleDateFormat dateFormat = null;
+		if(date.get(Calendar.YEAR)!=date.get(Calendar.YEAR)){
+			dateFormat = new SimpleDateFormat("h:mm a, MMM d, yyyy", Locale.US);
+		}
+		else{
+			dateFormat = new SimpleDateFormat(" h:mm a, MMM d", Locale.US);
+		}
         
 		if(msg.fromMe()){
 			detail += "To: "+rec.getPhoneNumber()+"\n";
-			detail += "Sent: "+dateFormat.format(date);
+			detail += "Sent: "+dateFormat.format(msg.getTimeStamp());
 		}
 		else{
 			detail += "From: "+rec.getPhoneNumber()+"\n";
-			detail += "Received: "+dateFormat.format(date);
+			detail += "Received: "+dateFormat.format(msg.getTimeStamp());
 		}
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		alert.setTitle("Message detials");

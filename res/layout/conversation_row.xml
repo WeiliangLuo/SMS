@@ -48,7 +48,7 @@
         android:layout_marginBottom="10dp"
         android:layout_marginTop="5dp"
         android:ellipsize="end"
-        android:maxLength="30"
+        android:maxLength="25"
         android:maxLines="1"
         android:scrollHorizontally="true"
         android:paddingBottom="10dp"        

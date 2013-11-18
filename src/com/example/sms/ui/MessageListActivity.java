@@ -2,7 +2,6 @@ package com.example.sms.ui;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -16,7 +15,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents;
 import android.text.Editable;
@@ -39,7 +37,6 @@ import com.example.sms.Contact;
 import com.example.sms.Message;
 import com.example.sms.MessageManager;
 import com.example.sms.R;
-import com.example.sms.ui.MainActivity.SmsObserver;
 
 public class MessageListActivity extends ListActivity implements OnItemClickListener, OnClickListener{
 	private static final String TAG = "MessageListActivity";

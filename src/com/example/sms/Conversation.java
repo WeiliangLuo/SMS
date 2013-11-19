@@ -19,6 +19,13 @@ public class Conversation {
 	private boolean hasDraft;
 	
 	/* Constructors */
+	/**
+	 *  Construct Conversation using (id, summary, contact, timeStamp)
+	 *  
+	 *  Contact is the other party involved in this conversation
+	 *  TimeStamp is timeStamp the most recent sent/received/composed message,
+	 *  which is miliseconds from epoch time
+	 **/
 	public Conversation(long id, String summary, Contact contact, long timeStamp) {
 		super();
 		this.id = id;
@@ -31,6 +38,10 @@ public class Conversation {
 		this.hasDraft = false;
 	}
 	
+	/**
+	 *  Construct Conversation using another conversation object
+	 *  
+	 **/
 	public Conversation(Conversation con){
 		this(con.id, con.summary, con.contact, con.timeStamp);
 		for(Message msg:messages){
@@ -42,60 +53,102 @@ public class Conversation {
 	
 	
 	/* Getter and Setter */
+	/**
+	 *  Get id of Conversation
+	 **/
 	public long getId() {
 		return id;
 	}
 
+	/**
+	 *  Set id of Conversation
+	 **/
 	public void setId(long id) {
 		this.id = id;
 	}
 
+	/**
+	 *  Get summary of Conversation
+	 **/
 	public String getSummary() {
 		return summary;
 	}
 
+	/**
+	 *  Set summary of Conversation
+	 **/
 	public void setSummary(String summary) {
 		this.summary = summary;
 	}
 
+	/**
+	 *  Get the other party of Conversation
+	 **/
 	public Contact getContact() {
 		return contact;
 	}
 
+	/**
+	 *  Set the other party of Conversation
+	 **/
 	public void setContact(Contact contact) {
 		this.contact = new Contact(contact);
 	}
 	
+	/**
+	 *  Get the message count of Conversation
+	 **/
 	public int getMsgCount(){
 		return this.msgCount;
 	}
 	
+	/**
+	 *  Set the message count of Conversation
+	 **/
 	public void setMsgCount(int msgCount){
 		this.msgCount = msgCount;
 	}
 	
+	/**
+	 *  Get the TimeStamp of Conversation
+	 **/
 	public long getTimeStamp(){
 		return this.timeStamp;
 	}
 	
+	/**
+	 *  Set the TimeStamp of Conversation
+	 **/
 	public void setTimeStamp(long timeStamp){
 		this.timeStamp = timeStamp;
 	}
 	
+	/**
+	 *  Get the unread flag of Conversation
+	 **/
+	public boolean hasUnread(){
+		return this.hasUnread;
+	}
+	
+	/**
+	 *  Set the unread flag of Conversation
+	 **/
 	public void setHasUnread(boolean hasUnread){
 		this.hasUnread = hasUnread;
 	}
 	
-	public boolean hasUnread(){
-		return this.hasUnread;
-	}
-
-	public void setHasDraft(boolean hasDraft){
-		this.hasDraft = hasDraft;
-	}
-	
+	/**
+	 *  Get the hasDraft flag of Conversation
+	 **/
 	public boolean hasDraft(){
 		return this.hasDraft;
+	}
+	
+	/**
+	 *  Set the hasDraft flag of Conversation
+	 **/
+	public void setHasDraft(boolean hasDraft){
+		this.hasDraft = hasDraft;
 	}
 	/* End Getter and Setter */
 
@@ -121,8 +174,11 @@ public class Conversation {
 	}
 
 	/**
-	 *  delete all messages belong to this conversation in the database
+	 *  Delete all messages belong to this conversation in the database
 	 * 
+	 *  There is no conversation entry stored in the database,
+	 *  the concept of conversation is just a logic concept based on a group
+	 *  of messages sharing the same thread_id
 	 * */
 	public void delete(Context context){
 		Uri uri = Uri.parse("content://sms/conversations/"+this.id);

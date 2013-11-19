@@ -11,7 +11,10 @@ public class ContactManager {
 	
 	/**
 	 * Look for contact that match given number
-	 * Return null if no match is found
+	 * by query Contact Provider in android
+	 * 
+	 * Return Contact with name as null, 
+	 * if no match is found
 	 * 
 	 **/
 	public static Contact getContactByNumber(Context context, String number){

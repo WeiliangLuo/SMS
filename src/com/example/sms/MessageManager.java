@@ -12,15 +12,24 @@ public class MessageManager {
 	private static final String TAG = "MessageManager";
 	
 	/*Column names unique in conversation*/
+	/** Column name in sms database */
 	public static final String CONVERSATION_ID = "thread_id";
+	/** Column name in sms database */
 	public static final String MESSAGE_COUNT = "msg_count";
+	/** Column name in sms database */
 	public static final String SNIPPET = "snippet";
 	/*Column names in sms*/
+	/** Column name in sms database */
 	public static final String ID = "_id";
+	/** Column name in sms database */
 	public static final String TIMESTAMP = "date";
+	/** Column name in sms database */
 	public static final String ADDRESS = "address";
+	/** Column name in sms database */
 	public static final String CONTENT = "body";
+	/** Column name in sms database */
 	public static final String READ = "read";
+	/** Column name in sms database */
 	public static final String TYPE = "type";
 	
 	

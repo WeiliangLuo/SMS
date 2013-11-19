@@ -8,16 +8,24 @@ import android.net.Uri;
 public class Message {
 	private static final String TAG = "Message";
 	
+	/**  All messages, not used this project */
     public static final int MESSAGE_TYPE_ALL    = 0;
+	/**  Message received by user */
     public static final int MESSAGE_TYPE_INBOX  = 1;
-    public static final int MESSAGE_TYPE_SENT   = 2;
-    public static final int MESSAGE_TYPE_DRAFT  = 3;
+	/** Message sent by user */
+    public static final int MESSAGE_TYPE_SENT   = 2;    
+	/** Draft message (At most 1 per conversation) */
+    public static final int MESSAGE_TYPE_DRAFT  = 3;    
+    /** Including draft, failed, queued, sent messages, not used this project */
     public static final int MESSAGE_TYPE_OUTBOX = 4;
-    public static final int MESSAGE_TYPE_FAILED = 5; // for failed outgoing messages
-    public static final int MESSAGE_TYPE_QUEUED = 6; // for messages to send later
+	/** Message failed to be sent, not used this project */
+    public static final int MESSAGE_TYPE_FAILED = 5;
+	/** Message being/to be sent from the user, not used this project */
+    public static final int MESSAGE_TYPE_QUEUED = 6;
 
-	
+    /** Candidate value for message unread flag */
 	public static final boolean SMS_UNREAD 	= true;
+	/** Candidate value for message unread flag */
 	public static final boolean SMS_READ 	= false;
 
 	private long id;
@@ -39,6 +47,11 @@ public class Message {
 	private Contact receiver;
 	
 	/* Constructors */
+	/**
+	 *  Construct Message using (message id, conversation id, content, type, unread, timeStamp, sender, receiver)
+	 *  
+	 *  Either sender or receiver will be null, for outgoing or incoming message
+	 **/
 	public Message(long id, long cid, String content, int type, boolean unread, long timeStamp, Contact sender,
 			Contact receiver) {
 		super();
@@ -51,7 +64,11 @@ public class Message {
 		this.sender = (sender==null)?null:new Contact(sender);
 		this.receiver = (receiver==null)?null:new Contact(receiver);
 	}
-
+	
+	/**
+	 *  Construct Message from another message object
+	 *  
+	 **/
 	public Message(Message msg){
 		this(msg.id, msg.conversation_id, msg.content, msg.type, msg.unread, msg.timeStamp, msg.sender, msg.receiver);
 	}
@@ -59,66 +76,118 @@ public class Message {
 	
 	
 	/* Getter and Setter */
+	/**
+	 *  Get id of Message
+	 **/
 	public long getId() {
 		return id;
 	}
-
+	
+	/**
+	 *  Set id of Message
+	 **/
 	public void setId(long id) {
 		this.id = id;
 	}
 	
+	/**
+	 *  Get conversation id of Message
+	 **/
 	public long getConversationId() {
 		return conversation_id;
 	}
 
+	/**
+	 *  Set conversation id of Message
+	 **/
 	public void setConversationId(long cid) {
 		this.conversation_id = cid;
 	}
 
+	/**
+	 *  Get content of Message
+	 **/
 	public String getContent() {
 		return content;
 	}
 
+	/**
+	 *  Set conversation id of Message
+	 **/
 	public void setContent(String content) {
 		this.content = content;
 	}
 
+	/**
+	 *  Get type of Message
+	 **/
 	public int getType() {
 		return type;
 	}
 
+	/**
+	 *  Set type of Message
+	 **/
 	public void setType(int type) {
 		this.type = type;
 	}	
 	
+	/**
+	 *  Get unread flag of Message
+	 **/
 	public boolean isUnread() {
 		return unread;
 	}
 
+	/**
+	 *  Set unread flag of Message
+	 **/
 	public void setUnread(boolean unread) {
 		this.unread = unread;
 	}
 	
+	/**
+	 *  Get timeStamp of Message
+	 **/
 	public long getTimeStamp() {
 		return timeStamp;
 	}
 
+	/**
+	 *  Set timeStamp of Message
+	 **/
 	public void setTimeStamp(long timeStamp) {
 		this.timeStamp = timeStamp;
 	}
 
+	/**
+	 *  Get sender of Message
+	 *  
+	 *  Notice: sender is null, when this is an outgoing message
+	 **/
 	public Contact getSender() {
 		return sender;
 	}
 
+	/**
+	 *  Set sender of Message
+	 */
 	public void setSender(Contact sender) {
 		this.sender = (sender==null)?null:new Contact(sender);
 	}
 
+	/**
+	 *  Get receiver of Message
+	 *  
+	 *  Notice: receiver is null, when this is an incoming message
+	 **/
 	public Contact getReceiver() {
 		return receiver;
 	}
 
+	/**
+	 *  Set receiver of Message
+	 */
 	public void setReceiver(Contact receiver) {
 		this.receiver = (receiver==null)?null:new Contact(receiver);
 	}
@@ -126,7 +195,7 @@ public class Message {
 	
 	/**
 	 * 	Compare this message with another one
-	 * 	
+	 * 	using the message id
 	 **/
 	public boolean equals(Message msg){
 		return msg.id == id;
@@ -141,7 +210,7 @@ public class Message {
 	}
 	
 	/**
-	 *  Return the contact that is not the user
+	 *  Return the contact of the other party of Message
 	 * 
 	 * */
 	public Contact getContact(){
@@ -165,7 +234,7 @@ public class Message {
 	}
 	
 	/**
-	 *  delete current message in the database
+	 *  Delete current message in the database
 	 * 
 	 * */
 	public void delete(Context context){

@@ -20,5 +20,27 @@
     <string name="send">Send</string>
     <string name="action_forward">Forward</string>
     <string name="action_detail">Message details</string>
+    <string name="title_activity_schedule_sms">ScheduleSMSActivity</string>
+    <string name="action_schedule_sms">Schedule SMS</string>
+    <string name="send_schedule_sms">Send</string>
+
+    <string-array name="repeat_options">
+        <item>No</item>
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+        <item>Yearly</item>
+    </string-array>
+    <string-array name="day_of_week">
+        <item>Sunday</item>
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednsday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+    </string-array>
+
+    <string name="title_activity_schedule_list">ScheduleListActivity</string>
 
 </resources>

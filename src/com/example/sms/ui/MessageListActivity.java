@@ -72,7 +72,6 @@ public class MessageListActivity extends ListActivity implements OnItemClickList
 		// initialize conversation data
 		Intent intent = getIntent();
 		cid = intent.getLongExtra("cid", 0);
-		Log.i(TAG, String.valueOf(cid));
 		draft = MessageManager.getDraftInCoversation(this, cid);
 		initData();
 

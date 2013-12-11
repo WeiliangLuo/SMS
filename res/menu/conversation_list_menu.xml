@@ -21,4 +21,10 @@
         android:title="@string/action_delete_all"
         android:orderInCategory="100"
         android:showAsAction="never"/>
+    
+	<item
+        android:id="@+id/action_schedule_sms"
+        android:title="@string/action_schedule_sms"
+        android:orderInCategory="100"
+		android:showAsAction="never"/>
 </menu>

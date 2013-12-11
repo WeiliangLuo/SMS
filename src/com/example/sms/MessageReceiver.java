@@ -1,4 +1,7 @@
 package com.example.sms;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -28,8 +31,9 @@ public class MessageReceiver extends BroadcastReceiver {
                 }
                 if (messages.length > -1) {
                     String body = messages[0].getMessageBody();
-                    String address = messages[0].getOriginatingAddress();
-                    long timeStamp = messages[0].getTimestampMillis();
+                    String address = extractNumber( messages[0].getOriginatingAddress() );
+                    long timeStamp = System.currentTimeMillis(); // use the timeStamp that message was received
+                    //messages[0].getTimestampMillis(); --> time the message was sent?
                     
                     // handle new message (save new message to database)
                     MessageManager.receiveMessage(context, address, body, timeStamp);
@@ -66,7 +70,19 @@ public class MessageReceiver extends BroadcastReceiver {
 		NotificationManager mNotificationManager =
 		    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
-		int mId = Constant.NOTIFICATION_ID;
+		int mId = Constant.NEW_SMS_NOTIFICATION_ID;
 		mNotificationManager.notify(mId, mBuilder.build());
+	}
+	
+	private String extractNumber(String address){
+		String number = "";
+	    // get numbers
+		Pattern pattern = Pattern.compile("\\d+");
+		Matcher matcher = pattern.matcher(address);
+		while(matcher.find()){
+			number += matcher.group();
+		}
+
+		return number;
 	}
 }

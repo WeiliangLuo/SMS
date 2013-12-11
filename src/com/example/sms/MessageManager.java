@@ -1,12 +1,14 @@
 package com.example.sms;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.telephony.SmsManager;
+import android.util.Log;
 
 public class MessageManager {
 	private static final String TAG = "MessageManager";
@@ -31,6 +33,8 @@ public class MessageManager {
 	public static final String READ = "read";
 	/** Column name in sms database */
 	public static final String TYPE = "type";
+	/** Column name in sms database, used to configure repeat for scheduled sms */
+	public static final String STATUS = "status";
 	
 	
 	/**
@@ -57,6 +61,7 @@ public class MessageManager {
 	 * 	
 	 **/
 	public static void sendMessage(Message msg){
+		Log.i(TAG, "Msg being sent to "+msg.getReceiver().getNameOrNumber());
 		SmsManager sms = SmsManager.getDefault();
 		sms.sendTextMessage(msg.getReceiver().getPhoneNumber(), null, msg.getContent(), null, null);
 	}
@@ -175,6 +180,9 @@ public class MessageManager {
 					// +message_count
 					// +summary
 					long cid = curCon.getLong(curCon.getColumnIndex(MessageManager.CONVERSATION_ID));
+					if(cid==-1){
+						continue;
+					}
 					int msgCount = curCon.getInt(curCon.getColumnIndex(MessageManager.MESSAGE_COUNT));
 					String summary = curCon.getString(curCon.getColumnIndex(MessageManager.SNIPPET));
 					// +address
@@ -331,5 +339,67 @@ public class MessageManager {
 		}
 
 		return cid;
+	}
+	
+	public static List<Message> getScheduledMessages(Context context){
+		List<Message> scheduledMessages = new ArrayList<Message>();
+		
+		Uri uriMsg = Uri.parse("content://sms/");
+		Cursor curMsg = context.getContentResolver().query(
+				uriMsg,
+				new String[] {MessageManager.ID, MessageManager.ADDRESS, MessageManager.CONTENT, MessageManager.TIMESTAMP, MessageManager.STATUS},
+				MessageManager.TYPE+"=?",
+				new String[] {String.valueOf(Message.MESSAGE_TYPE_SCHEDULED)},
+				null);
+		
+		if(curMsg!=null){
+			// There is only one (or no) draft per conversation
+			if(curMsg.moveToFirst()){
+				do{
+					long id = curMsg.getInt(0);
+					String address = curMsg.getString(1);
+					String body = curMsg.getString(2);
+					long timeStamp = curMsg.getLong(3);
+					int repeat = curMsg.getInt(4);
+					Contact rec = ContactManager.getContactByNumber(context, address);
+					Message msg = new Message(id, -1, body, Message.MESSAGE_TYPE_SCHEDULED, Message.SMS_READ, timeStamp, null, rec);
+					msg.setRepeat(repeat);
+					scheduledMessages.add(msg);
+				}while(curMsg.moveToNext());
+			}
+			curMsg.close();
+		}
+		return scheduledMessages;
+	}
+
+	/**
+	 * Get scheduled message by Id
+	 * 
+	 * Scheduled message used read/unread column to store the repeat configuration.
+	 **/
+	public static Message getScheduledMessageById(Context context, long id) {
+		Message msg = null;
+		Uri uriMsg = Uri.parse("content://sms/"+id);
+		Cursor curMsg = context.getContentResolver().query(
+				uriMsg,
+				new String[] {MessageManager.ADDRESS, MessageManager.CONTENT, MessageManager.TIMESTAMP, MessageManager.STATUS},
+				MessageManager.TYPE+"=?",
+				new String[] {String.valueOf(Message.MESSAGE_TYPE_SCHEDULED)},
+				null);
+		
+		if(curMsg!=null){
+			// There is only one (or no) draft per conversation
+			if(curMsg.moveToFirst()){
+				String address = curMsg.getString(0);
+				String body = curMsg.getString(1);
+				long timeStamp = curMsg.getLong(2);
+				int repeat = curMsg.getInt(3);
+				Contact rec = ContactManager.getContactByNumber(context, address);
+				msg = new Message(id, -1, body, Message.MESSAGE_TYPE_SCHEDULED, Message.SMS_READ, timeStamp, null, rec);
+				msg.setRepeat(repeat);
+			}
+			curMsg.close();
+		}
+		return msg;
 	}
 }

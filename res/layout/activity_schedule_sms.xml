@@ -1,0 +1,194 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/my_vertical_margin"
+    android:paddingLeft="@dimen/my_horizontal_margin"
+    android:paddingRight="@dimen/my_horizontal_margin"
+    android:paddingTop="@dimen/my_vertical_margin"
+    tools:context=".ScheduleSMSActivity" >
+
+    <EditText
+        android:id="@+id/text_to"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/btn_add"
+        android:ems="10"
+        android:hint="@string/to"
+        android:singleLine="true" >
+        <requestFocus />
+    </EditText>
+
+    <ImageButton
+        android:id="@+id/btn_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/text_to"
+        android:layout_alignParentRight="true"
+        android:src="@android:drawable/ic_input_add" />
+
+	<RelativeLayout
+        android:id="@+id/spinner_layout"
+        android:layout_width="match_parent"
+        android:layout_height="40dip"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/text_to"
+        android:layout_marginTop="15dp" 
+		android:orientation="vertical"
+     	android:gravity="center_horizontal">
+        
+	    <TextView
+            android:id="@+id/text_spinner_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Repeat message? "
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_centerInParent="true"/>
+	    
+		<Spinner
+	        android:id="@+id/spinner_repeat"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true"
+	        android:layout_centerInParent="true"/>
+
+		<View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="@android:color/darker_gray" />
+	</RelativeLayout>
+	    
+    <RelativeLayout
+        android:id="@+id/date_picker"
+        android:layout_width="match_parent"
+        android:layout_height="40dip"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/spinner_layout"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/text_date_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Date: "
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_centerInParent="true"/>
+
+        <TextView
+            android:id="@+id/text_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_toRightOf="@+id/text_date_desc"
+            android:text="date"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_centerInParent="true"/>
+
+        <Button
+            android:id="@+id/btn_date"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text=" > "
+            android:layout_centerInParent="true"/>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="@android:color/darker_gray" />
+
+    </RelativeLayout>
+	
+    <RelativeLayout
+        android:id="@+id/time_picker"
+        android:layout_width="match_parent"
+        android:layout_height="40dip"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/date_picker"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+     	android:gravity="center_horizontal" >
+
+        <TextView
+            android:id="@+id/text_time_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Time: "
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_centerInParent="true" />
+
+        <TextView
+            android:id="@+id/text_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/text_time_desc"
+            android:layout_marginLeft="5dip"
+            android:text="time"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_centerInParent="true" />
+
+        <Button
+            android:id="@+id/btn_time"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text=" > "
+            android:layout_centerInParent="true" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="@android:color/darker_gray" />
+
+    </RelativeLayout>
+	
+    <RelativeLayout
+        android:id="@+id/input_bar"
+        android:layout_width="match_parent"
+        android:layout_height="60dip"
+	    android:layout_alignParentBottom="true"
+	    android:layout_alignParentLeft="true"
+	    android:layout_alignParentRight="true"
+	    android:layout_alignParentTop="false">
+
+		<View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:background="@android:color/darker_gray" />
+		
+        <EditText
+            android:id="@+id/text_content"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/btn_send"
+            android:ems="10"
+            android:hint="@string/type_message"
+            android:maxLines="4" />
+
+        <Button
+            android:id="@+id/btn_send"
+            android:layout_width="wrap_content"
+            android:layout_height="40dip"
+            android:layout_alignParentRight="true"
+            android:text="@string/send_schedule_sms"
+            android:layout_centerInParent="true" />
+         
+    </RelativeLayout>
+
+
+</RelativeLayout>

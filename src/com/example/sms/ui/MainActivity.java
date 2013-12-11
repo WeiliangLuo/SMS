@@ -76,6 +76,7 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
             	
                 mode.finish(); // Action picked, so close the CAB
                 return true;
+
             default:
                 return false;
 	        }
@@ -207,9 +208,17 @@ public class MainActivity extends ActionBarActivity implements OnItemClickListen
                         NewMessageActivity.class);
                 startActivity(intent);
 	            return true;
+	            
 	        case R.id.action_delete_all:
 	        	delete_conversations(null);
 	            return true;
+
+            case R.id.action_schedule_sms:
+	            intent = new Intent(MainActivity.this,
+	            		ScheduleListActivity.class);
+	            startActivity(intent);
+            	return true;
+            	
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }

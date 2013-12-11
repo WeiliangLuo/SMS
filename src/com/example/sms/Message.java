@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 public class Message {
 	private static final String TAG = "Message";
@@ -22,12 +23,14 @@ public class Message {
     public static final int MESSAGE_TYPE_FAILED = 5;
 	/** Message being/to be sent from the user, not used this project */
     public static final int MESSAGE_TYPE_QUEUED = 6;
+	/** Message being/to be sent from the user, not used this project */
+    public static final int MESSAGE_TYPE_SCHEDULED = 7;
 
     /** Candidate value for message unread flag */
 	public static final boolean SMS_UNREAD 	= true;
 	/** Candidate value for message unread flag */
 	public static final boolean SMS_READ 	= false;
-
+		
 	private long id;
 	private long conversation_id;
 	private String content;
@@ -45,6 +48,9 @@ public class Message {
 	// one of them will be null (the user)
 	private Contact sender;
 	private Contact receiver;
+	
+	// exclusively for scheduled sms
+	private int repeat;
 	
 	/* Constructors */
 	/**
@@ -191,6 +197,20 @@ public class Message {
 	public void setReceiver(Contact receiver) {
 		this.receiver = (receiver==null)?null:new Contact(receiver);
 	}
+	
+	/**
+	 *	Set repeat of a scheduled sms 
+	 **/
+	public void setRepeat(int repeat){
+		this.repeat = repeat;
+	}
+	
+	/**
+	 *	Get repeat of a scheduled sms 
+	 **/
+	public int getRepeat(){
+		return this.repeat;
+	}
 	/* End Getter and Setter */
 	
 	/**
@@ -230,6 +250,10 @@ public class Message {
 		values.put(MessageManager.TIMESTAMP, this.timeStamp);
 		values.put(MessageManager.READ, this.unread?0:1);
 		
+		if(this.type == Message.MESSAGE_TYPE_SCHEDULED){
+			values.put(MessageManager.STATUS, this.repeat);
+		}
+		
 		context.getContentResolver().update(uriMsg, values, null, null);
 	}
 	
@@ -252,7 +276,8 @@ public class Message {
 		if(this.type==Message.MESSAGE_TYPE_DRAFT
 				||this.type==Message.MESSAGE_TYPE_FAILED
 				||this.type==Message.MESSAGE_TYPE_QUEUED
-				||this.type==Message.MESSAGE_TYPE_SENT){
+				||this.type==Message.MESSAGE_TYPE_SENT
+				||this.type==Message.MESSAGE_TYPE_SCHEDULED){
 			values.put(MessageManager.ADDRESS, this.receiver.getPhoneNumber());
 		}
 		else{ //this.type==Message.MESSAGE_TYPE_INBOX
@@ -262,6 +287,9 @@ public class Message {
 		values.put(MessageManager.CONTENT, this.content);
 		values.put(MessageManager.TIMESTAMP, this.timeStamp);
 		values.put(MessageManager.READ, this.unread?0:1);
+		if(this.type==Message.MESSAGE_TYPE_SCHEDULED){
+			values.put(MessageManager.STATUS, this.repeat);
+		}
 		values.put(MessageManager.TYPE, this.type);
 		values.put(MessageManager.CONVERSATION_ID, this.conversation_id);
 		uriMsg = context.getContentResolver().insert(uriMsg, values);

@@ -7,12 +7,14 @@
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="18" />
-    <uses-permission android:name="android.permission.WRITE_SMS"/>
-    <uses-permission android:name="android.permission.READ_SMS"/>
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
-    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
-    <uses-permission android:name="android.permission.SEND_SMS"/>
+
+    <uses-permission android:name="android.permission.WRITE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
         android:allowBackup="true"
@@ -46,23 +48,32 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        
         <activity
             android:name="com.example.sms.ui.NewMessageActivity"
             android:label="@string/title_activity_new_message" >
         </activity>
-        
         <activity
             android:name="com.example.sms.ui.MessageListActivity"
-            android:label="@string/title_activity_message_list" 
-            android:parentActivityName=".ui.MainActivity">
+            android:label="@string/title_activity_message_list"
+            android:parentActivityName=".ui.MainActivity" >
         </activity>
-        
-        <receiver android:name="MessageReceiver">
-            <intent-filter android:priority="1000">
-				<action android:name="android.provider.Telephony.SMS_RECEIVED" />
+
+        <receiver android:name="com.example.sms.MessageReceiver" >
+            <intent-filter android:priority="1000" >
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
+
+        <receiver  android:process=":remote" android:name="Alarm"></receiver>
+        
+        <activity
+            android:name="com.example.sms.ui.ScheduleSMSActivity"
+            android:label="@string/title_activity_schedule_sms" >
+        </activity>
+        <activity
+            android:name="com.example.sms.ui.ScheduleListActivity"
+            android:label="@string/title_activity_schedule_list" >
+        </activity>
     </application>
 
 </manifest>

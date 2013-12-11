@@ -488,7 +488,7 @@ public class ScheduleSMSActivity extends FragmentActivity implements OnClickList
 		}
 		long nextTriggerTime = Alarm.nextTriggerTime(cal.getTimeInMillis(), repeat);
 		if(nextTriggerTime==-1){
-			Toast.makeText(this, 
+			Toast.makeText(this,
 					"Time already passed!", Toast.LENGTH_SHORT).show();
 			return false;
 		}

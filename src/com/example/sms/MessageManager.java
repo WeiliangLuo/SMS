@@ -62,8 +62,8 @@ public class MessageManager {
 	 **/
 	public static void sendMessage(Message msg){
 		Log.i(TAG, "Msg being sent to "+msg.getReceiver().getNameOrNumber());
-		SmsManager sms = SmsManager.getDefault();
-		sms.sendTextMessage(msg.getReceiver().getPhoneNumber(), null, msg.getContent(), null, null);
+		//SmsManager sms = SmsManager.getDefault();
+		//sms.sendTextMessage(msg.getReceiver().getPhoneNumber(), null, msg.getContent(), null, null);
 	}
 	
 	/**
@@ -307,8 +307,8 @@ public class MessageManager {
 		Cursor cur = context.getContentResolver().query(
 				uri, 
 				new String[] {MessageManager.CONVERSATION_ID},
-				MessageManager.ADDRESS+"=?", 
-				new String[] {number}, 
+				MessageManager.ADDRESS+"=? AND "+MessageManager.TYPE+"!=?", 
+				new String[] {number, String.valueOf(Message.MESSAGE_TYPE_SCHEDULED)}, 
 				null);
 		if(cur!=null){
 			if(cur.moveToFirst()){

@@ -20,7 +20,9 @@ import android.view.View;
 import android.widget.Toast;
 
 public class Alarm extends BroadcastReceiver{    
-     @Override
+     private static final String TAG = "Alarm";
+
+	@Override
      public void onReceive(Context context, Intent intent) 
      {   
          PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
